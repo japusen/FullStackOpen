@@ -44,17 +44,22 @@ const Footer = (props) => {
 };
 
 const App = () => {
-	const course = "Half Stack application development";
-	const parts = [
-		{ title: "Fundamentals of React", numExercises: 10 },
-		{ title: "Using props to pass data", numExercises: 7 },
-		{ title: "State of a component", numExercises: 14 },
-	];
-	const total = parts.reduce((total, part) => total + part.numExercises, 0);
+	const course = {
+		name: "Half Stack application development",
+		parts: [
+			{ title: "Fundamentals of React", numExercises: 10 },
+			{ title: "Using props to pass data", numExercises: 7 },
+			{ title: "State of a component", numExercises: 14 },
+		],
+	};
+	const total = course.parts.reduce(
+		(total, part) => total + part.numExercises,
+		0
+	);
 	return (
 		<div>
 			<Header course={course} />
-			<Content parts={parts} />
+			<Content parts={course.parts} />
 			<Footer total={total} />
 		</div>
 	);
