@@ -1,68 +1,9 @@
 import { useEffect, useState } from "react";
 import personService from "./services/person";
 import Notification from "./components/Notification";
-
-const Filter = ({ setNewFilter }) => {
-	const handleFilterChange = (event) => {
-		setNewFilter(event.target.value.toLowerCase());
-	};
-
-	return (
-		<div>
-			filter shown with <input onChange={handleFilterChange}></input>
-		</div>
-	);
-};
-
-const PersonForm = ({
-	nameInputValue,
-	phoneInputValue,
-	addNewPerson,
-	handlePhoneNumberChange,
-	handleNameChange,
-}) => {
-	return (
-		<form onSubmit={addNewPerson}>
-			<div>
-				name:{" "}
-				<input value={nameInputValue} onChange={handleNameChange} />
-			</div>
-			<div>
-				number:{" "}
-				<input
-					value={phoneInputValue}
-					onChange={handlePhoneNumberChange}
-				/>
-			</div>
-			<div>
-				<button type="submit">add</button>
-			</div>
-		</form>
-	);
-};
-
-const Persons = ({ persons, onDelete }) => {
-	return (
-		<>
-			{persons.map((person) => (
-				<Person
-					key={person.id}
-					person={person}
-					onDelete={() => onDelete(person.id)}
-				/>
-			))}
-		</>
-	);
-};
-
-const Person = ({ person, onDelete }) => (
-	<>
-		<p>
-			{person.name} {person.number}
-		</p>
-		<button onClick={onDelete}>delete</button>
-	</>
-);
+import Filter from "./components/Filter";
+import PersonForm from "./components/PersonForm";
+import Persons from "./components/Persons";
 
 const App = () => {
 	const [persons, setPersons] = useState([]);
