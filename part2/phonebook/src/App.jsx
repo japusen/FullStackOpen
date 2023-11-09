@@ -14,6 +14,8 @@ const Filter = ({ setNewFilter }) => {
 };
 
 const PersonForm = ({
+	nameInputValue,
+	phoneInputValue,
 	addNewPerson,
 	handlePhoneNumberChange,
 	handleNameChange,
@@ -21,10 +23,15 @@ const PersonForm = ({
 	return (
 		<form onSubmit={addNewPerson}>
 			<div>
-				name: <input onChange={handleNameChange} />
+				name:{" "}
+				<input value={nameInputValue} onChange={handleNameChange} />
 			</div>
 			<div>
-				number: <input onChange={handlePhoneNumberChange} />
+				number:{" "}
+				<input
+					value={phoneInputValue}
+					onChange={handlePhoneNumberChange}
+				/>
 			</div>
 			<div>
 				<button type="submit">add</button>
@@ -71,7 +78,9 @@ const App = () => {
 	const addNewPerson = (event) => {
 		event.preventDefault();
 
-		const person = persons.find((person) => person.name === newName);
+		const person = persons.find(
+			(person) => person.name.toLowerCase() === newName.toLowerCase()
+		);
 		if (person) {
 			if (
 				window.confirm(
@@ -137,6 +146,8 @@ const App = () => {
 			<Filter setNewFilter={setNewFilter} />
 			<h2>add a new</h2>
 			<PersonForm
+				nameInputValue={newName}
+				phoneInputValue={newPhoneNumber}
 				addNewPerson={addNewPerson}
 				handleNameChange={handleNameChange}
 				handlePhoneNumberChange={handlePhoneNumberChange}
