@@ -11,6 +11,7 @@ const App = () => {
 	const [newPhoneNumber, setNewPhoneNumber] = useState("");
 	const [filter, setNewFilter] = useState("");
 	const [notification, setNotification] = useState(null);
+	const [isError, setIsError] = useState(false);
 
 	useEffect(() => {
 		personService.getAll().then((initialPersons) => {
@@ -42,9 +43,20 @@ const App = () => {
 								p.id === returnedPerson.id ? returnedPerson : p
 							)
 						);
-						setNotification(`Updated ${person.name}'s number `);
+						setNotification(`Updated ${person.name}'s number`);
 						setTimeout(() => {
 							setNotification(null);
+						}, 5000);
+					})
+					.catch((error) => {
+						setNotification(
+							`Information of ${person.name} has already been removed from server`
+						);
+						setIsError(true);
+						setPersons(persons.filter((p) => p.id !== person.id));
+						setTimeout(() => {
+							setNotification(null);
+							setIsError(false);
 						}, 5000);
 					});
 			}
@@ -56,7 +68,7 @@ const App = () => {
 
 			personService.create(newPerson).then((returnedPerson) => {
 				setPersons(persons.concat(returnedPerson));
-				setNotification(`Added ${returnedPerson.name}`);
+				setNotification(`Added ${returnedPerson.name}`, false);
 				setTimeout(() => {
 					setNotification(null);
 				}, 5000);
@@ -94,7 +106,7 @@ const App = () => {
 	return (
 		<div>
 			<h2>Phonebook</h2>
-			<Notification message={notification} />
+			<Notification message={notification} isError={isError} />
 			<Filter setNewFilter={setNewFilter} />
 			<h2>add a new</h2>
 			<PersonForm
