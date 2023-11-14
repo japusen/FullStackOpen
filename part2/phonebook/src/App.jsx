@@ -66,13 +66,23 @@ const App = () => {
 				number: newPhoneNumber,
 			};
 
-			personService.create(newPerson).then((returnedPerson) => {
-				setPersons(persons.concat(returnedPerson));
-				setNotification(`Added ${returnedPerson.name}`, false);
-				setTimeout(() => {
-					setNotification(null);
-				}, 5000);
-			});
+			personService
+				.create(newPerson)
+				.then((returnedPerson) => {
+					setPersons(persons.concat(returnedPerson));
+					setNotification(`Added ${returnedPerson.name}`, false);
+					setTimeout(() => {
+						setNotification(null);
+					}, 5000);
+				})
+				.catch((error) => {
+					setNotification(error.response.data.error);
+					setIsError(true);
+					setTimeout(() => {
+						setNotification(null);
+						setIsError(false);
+					}, 5000);
+				});
 		}
 
 		setNewName("");
