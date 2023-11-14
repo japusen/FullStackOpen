@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Note from "./components/Note";
 import noteService from "./services/notes";
+import Notification from "./components/Notification";
 
 const Footer = () => {
 	const footerStyle = {
@@ -23,7 +24,7 @@ const App = () => {
 	const [notes, setNotes] = useState([]);
 	const [newNote, setNewNote] = useState("");
 	const [showAll, setShowAll] = useState(true);
-	const [errorMessage, setErrorMessage] = useState("some error happened...");
+	const [errorMessage, setErrorMessage] = useState("");
 
 	const hook = () => {
 		noteService.getAll().then((initialNotes) => {
