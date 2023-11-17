@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Blog from "./components/Blog";
 import LoginForm from "./components/LoginForm";
 import BlogForm from "./components/BlogForm";
+import Notification from "./components/Notification";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
 
@@ -13,6 +14,7 @@ const App = () => {
 	const [title, setTitle] = useState("");
 	const [author, setAuthor] = useState("");
 	const [url, setUrl] = useState("");
+	const [notification, setNotification] = useState(null);
 
 	useEffect(() => {
 		blogService.getAll().then((blogs) => setBlogs(blogs));
@@ -42,9 +44,9 @@ const App = () => {
 			setUsername("");
 			setPassword("");
 		} catch (exception) {
-			setErrorMessage("Wrong credentials");
+			setNotification("invalid username or password");
 			setTimeout(() => {
-				setErrorMessage(null);
+				setNotification(null);
 			}, 5000);
 		}
 	};
@@ -54,20 +56,33 @@ const App = () => {
 		setUser(null);
 	};
 
-	const addBlog = (event) => {
+	const addBlog = async (event) => {
 		event.preventDefault();
+
 		const blogObject = {
 			title: title,
 			author: author,
 			url: url,
 		};
 
-		blogService.create(blogObject).then((returnedBlog) => {
+		try {
+			const returnedBlog = await blogService.create(blogObject);
 			setBlogs(blogs.concat(returnedBlog));
 			setTitle("");
 			setAuthor("");
 			setUrl("");
-		});
+			setNotification(
+				`added blog: ${returnedBlog.title} by ${returnedBlog.author}`
+			);
+			setTimeout(() => {
+				setNotification(null);
+			}, 5000);
+		} catch (exception) {
+			setNotification(exception.response.data.error);
+			setTimeout(() => {
+				setNotification(null);
+			}, 5000);
+		}
 	};
 
 	return (
@@ -75,6 +90,7 @@ const App = () => {
 			{user === null ? (
 				<div>
 					<h1>log in to application</h1>
+					<Notification notification={notification} />
 					<LoginForm
 						username={username}
 						password={password}
@@ -94,6 +110,7 @@ const App = () => {
 						Logged in as {user.name}
 						<button onClick={handleLogout}>logout</button>
 					</p>
+					<Notification notification={notification} />
 					<BlogForm
 						title={title}
 						author={author}
