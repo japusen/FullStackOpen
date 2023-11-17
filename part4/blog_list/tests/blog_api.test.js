@@ -12,8 +12,14 @@ beforeEach(async () => {
 	await Blog.deleteMany({});
 
 	const blogObjects = helper.initialBlogs.map((blog) => new Blog(blog));
-	const promiseArray = blogObjects.map((blog) => blog.save());
-	await Promise.all(promiseArray);
+	const blogPromiseArray = blogObjects.map((blog) => blog.save());
+	await Promise.all(blogPromiseArray);
+
+	await User.deleteMany({});
+
+	const userObjects = helper.initialUsers.map((user) => new User(user));
+	const userPromiseArray = userObjects.map((user) => user.save());
+	await Promise.all(userPromiseArray);
 }, 100000);
 
 describe("when there are initially some blogs saved", () => {
@@ -123,10 +129,6 @@ describe("updating a blog", () => {
 });
 
 describe("creating a user", () => {
-	beforeEach(async () => {
-		await User.deleteMany({});
-	}, 100000);
-
 	test("succeeds with valid data", async () => {
 		const newUser = {
 			username: "test",
@@ -141,7 +143,7 @@ describe("creating a user", () => {
 			.expect("Content-Type", /application\/json/);
 
 		const usersAfter = await helper.usersInDb();
-		expect(usersAfter).toHaveLength(1);
+		expect(usersAfter).toHaveLength(helper.initialUsers.length + 1);
 
 		const usernames = usersAfter.map((u) => u.username);
 		expect(usernames).toContain("test");
@@ -163,7 +165,7 @@ describe("creating a user", () => {
 		await api.post("/api/users").send(newUser).expect(400);
 
 		const usersAfter = await helper.usersInDb();
-		expect(usersAfter).toHaveLength(1);
+		expect(usersAfter).toHaveLength(helper.initialUsers.length + 1);
 	});
 
 	test("fails if password is missing", async () => {
@@ -175,7 +177,7 @@ describe("creating a user", () => {
 		await api.post("/api/users").send(newUser).expect(401);
 
 		const usersAfter = await helper.usersInDb();
-		expect(usersAfter).toHaveLength(0);
+		expect(usersAfter).toHaveLength(helper.initialUsers.length);
 	});
 
 	test("fails if password is less than 3 characters", async () => {
@@ -188,7 +190,7 @@ describe("creating a user", () => {
 		await api.post("/api/users").send(newUser).expect(401);
 
 		const usersAfter = await helper.usersInDb();
-		expect(usersAfter).toHaveLength(0);
+		expect(usersAfter).toHaveLength(helper.initialUsers.length);
 	});
 });
 
