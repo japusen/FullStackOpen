@@ -6,6 +6,7 @@ const app = require("../app");
 const api = supertest(app);
 
 const Blog = require("../models/blog");
+const User = require("../models/user");
 
 beforeEach(async () => {
 	await Blog.deleteMany({});
@@ -118,6 +119,76 @@ describe("updating a blog", () => {
 
 		const blogsAfter = await helper.blogsInDb();
 		expect(blogsAfter).toHaveLength(helper.initialBlogs.length);
+	});
+});
+
+describe("creating a user", () => {
+	beforeEach(async () => {
+		await User.deleteMany({});
+	}, 100000);
+
+	test("succeeds with valid data", async () => {
+		const newUser = {
+			username: "test",
+			name: "test",
+			password: "test",
+		};
+
+		await api
+			.post("/api/users")
+			.send(newUser)
+			.expect(201)
+			.expect("Content-Type", /application\/json/);
+
+		const usersAfter = await helper.usersInDb();
+		expect(usersAfter).toHaveLength(1);
+
+		const usernames = usersAfter.map((u) => u.username);
+		expect(usernames).toContain("test");
+	});
+
+	test("fails if the username is not unique", async () => {
+		const newUser = {
+			username: "test",
+			name: "test",
+			password: "test",
+		};
+
+		await api
+			.post("/api/users")
+			.send(newUser)
+			.expect(201)
+			.expect("Content-Type", /application\/json/);
+
+		await api.post("/api/users").send(newUser).expect(400);
+
+		const usersAfter = await helper.usersInDb();
+		expect(usersAfter).toHaveLength(1);
+	});
+
+	test("fails if password is missing", async () => {
+		const newUser = {
+			username: "test",
+			name: "test",
+		};
+
+		await api.post("/api/users").send(newUser).expect(401);
+
+		const usersAfter = await helper.usersInDb();
+		expect(usersAfter).toHaveLength(0);
+	});
+
+	test("fails if password is less than 3 characters", async () => {
+		const newUser = {
+			username: "test",
+			name: "test",
+			password: "1",
+		};
+
+		await api.post("/api/users").send(newUser).expect(401);
+
+		const usersAfter = await helper.usersInDb();
+		expect(usersAfter).toHaveLength(0);
 	});
 });
 
