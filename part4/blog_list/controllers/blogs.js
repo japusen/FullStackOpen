@@ -14,7 +14,11 @@ blogsRouter.get("/", async (request, response) => {
 blogsRouter.post("/", middleware.userExtractor, async (request, response) => {
 	const body = request.body;
 
-	const user = await User.findById(request.userid);
+	const user = request.user;
+
+	if (!user) {
+		return response.status(401).json({ error: "operation not permitted" });
+	}
 
 	const newBlog = new Blog({
 		title: body.title,
@@ -37,16 +41,22 @@ blogsRouter.delete(
 	middleware.userExtractor,
 	async (request, response) => {
 		const blog = await Blog.findById(request.params.id);
+		const user = request.user;
 
 		if (!blog) {
 			return response.status(401).json({ error: "blog does not exist" });
 		}
 
-		if (request.userid !== blog.user.toString()) {
+		if (!user || user.id !== blog.user.toString()) {
 			return response.status(401).json({ error: "Unauthorized " });
 		}
 
-		await Blog.findByIdAndDelete(request.params.id);
+		user.blogs = user.blogs.filter(
+			(b) => b.toString() !== blog.id.toString()
+		);
+
+		await user.save();
+		await blog.remove();
 		response.status(204).end();
 	}
 );
