@@ -31,9 +31,12 @@ const errorHandler = (error, request, response, next) => {
 const tokenExtractor = (request, response, next) => {
 	const authorization = request.get("Authorization");
 	if (authorization && authorization.startsWith("Bearer ")) {
-		return response.json({ token: authorization.replace("Bearer ", "") });
+		request.token = authorization.replace("Bearer ", "");
+	} else {
+		request.token = null;
 	}
-	return response.json({ token: null });
+
+	next();
 };
 
 module.exports = {
