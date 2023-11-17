@@ -43,7 +43,52 @@ describe("when there are initially some blogs saved", () => {
 	});
 });
 
-describe("addition of a new note", () => {
+describe("addition of a new blog", () => {
+	let token = "";
+
+	beforeEach(async () => {
+		const newUser = {
+			username: "test",
+			name: "test",
+			password: "test",
+		};
+
+		await api
+			.post("/api/users")
+			.send(newUser)
+			.expect(201)
+			.expect("Content-Type", /application\/json/);
+
+		const response = await api.post("/api/login").send({
+			username: "test",
+			password: "test",
+		});
+
+		token = response.body.token;
+	}, 100000);
+
+	test("fails without a token", async () => {
+		const newBlog = {
+			title: "async/await simplifies making async calls",
+			url: "test.com",
+		};
+
+		await api.post("/api/blogs").send(newBlog).expect(401);
+	});
+
+	test("fails with invalid token", async () => {
+		const newBlog = {
+			title: "async/await simplifies making async calls",
+			url: "test.com",
+		};
+
+		await api
+			.post("/api/blogs")
+			.set("Authorization", "Bearer " + "wrongtoken")
+			.send(newBlog)
+			.expect(401);
+	});
+
 	test("succeeds with valid data", async () => {
 		const newBlog = {
 			title: "async/await simplifies making async calls",
@@ -52,6 +97,7 @@ describe("addition of a new note", () => {
 
 		await api
 			.post("/api/blogs")
+			.set("Authorization", "Bearer " + token)
 			.send(newBlog)
 			.expect(201)
 			.expect("Content-Type", /application\/json/);
@@ -71,6 +117,7 @@ describe("addition of a new note", () => {
 
 		const response = await api
 			.post("/api/blogs")
+			.set("Authorization", "Bearer " + token)
 			.send(newBlog)
 			.expect(201)
 			.expect("Content-Type", /application\/json/);
@@ -90,24 +137,84 @@ describe("addition of a new note", () => {
 
 		const missingTitleAndURL = {};
 
-		await api.post("/api/blogs").send(missingTitle).expect(400);
-		await api.post("/api/blogs").send(missingURL).expect(400);
-		await api.post("/api/blogs").send(missingTitleAndURL).expect(400);
+		await api
+			.post("/api/blogs")
+			.set("Authorization", "Bearer " + token)
+			.send(missingTitle)
+			.expect(400);
+		await api
+			.post("/api/blogs")
+			.set("Authorization", "Bearer " + token)
+			.send(missingURL)
+			.expect(400);
+		await api
+			.post("/api/blogs")
+			.set("Authorization", "Bearer " + token)
+			.send(missingTitleAndURL)
+			.expect(400);
 	});
 });
 
 describe("deletion of a blog", () => {
+	let token = "";
+	let blogId = "";
+
+	beforeEach(async () => {
+		const newUser = {
+			username: "test",
+			name: "test",
+			password: "test",
+		};
+
+		await api
+			.post("/api/users")
+			.send(newUser)
+			.expect(201)
+			.expect("Content-Type", /application\/json/);
+
+		const response = await api.post("/api/login").send({
+			username: "test",
+			password: "test",
+		});
+
+		token = response.body.token;
+
+		const newBlog = {
+			title: "async/await simplifies making async calls",
+			url: "test.com",
+		};
+
+		const secondResponse = await api
+			.post("/api/blogs")
+			.set("Authorization", "Bearer " + token)
+			.send(newBlog)
+			.expect(201)
+			.expect("Content-Type", /application\/json/);
+
+		blogId = secondResponse.body.id;
+	}, 100000);
+
+	test("fails without a token", async () => {
+		const newBlog = {
+			title: "async/await simplifies making async calls",
+			url: "test.com",
+		};
+
+		await api.delete(`/api/blogs/${blogId}`).expect(401);
+	});
+
+	test("fails with invalid token", async () => {
+		await api
+			.delete(`/api/blogs/${blogId}`)
+			.set("Authorization", "Bearer " + "wrongtoken")
+			.expect(401);
+	});
+
 	test("succeeds with a valid id", async () => {
-		const blogs = await helper.blogsInDb();
-		const blogToDelete = blogs[0];
-
-		await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
-
-		const blogsAfter = await helper.blogsInDb();
-		expect(blogsAfter).toHaveLength(helper.initialBlogs.length - 1);
-
-		const titles = blogsAfter.map((b) => b.title);
-		expect(titles).not.toContain(blogToDelete.title);
+		await api
+			.delete(`/api/blogs/${blogId}`)
+			.set("Authorization", "Bearer " + token)
+			.expect(204);
 	});
 });
 

@@ -43,7 +43,7 @@ const tokenExtractor = (request, response, next) => {
 const userExtractor = (request, response, next) => {
 	const decodedToken = jwt.verify(request.token, process.env.SECRET);
 	if (!decodedToken.id) {
-		return response.status(401).json({ error: "token invalid" });
+		return response.status(401).json({ error: "Unauthorized" });
 	} else {
 		request.userid = decodedToken.id;
 	}

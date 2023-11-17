@@ -43,9 +43,7 @@ blogsRouter.delete(
 		}
 
 		if (request.userid !== blog.user.toString()) {
-			return response
-				.status(401)
-				.json({ error: "user is not blog creator" });
+			return response.status(401).json({ error: "Unauthorized " });
 		}
 
 		await Blog.findByIdAndDelete(request.params.id);

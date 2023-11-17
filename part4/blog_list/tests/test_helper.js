@@ -43,8 +43,8 @@ const initialBlogs = [
 const initialUsers = [
 	{
 		username: "admin",
-		name: "Adming",
-		passwordHash: "abc123",
+		name: "Admin",
+		passwordHash: "hash",
 	},
 ];
 
