@@ -13,8 +13,16 @@ const App = () => {
 	const [notification, setNotification] = useState(null);
 	const blogFormRef = useRef();
 
+	const byLikes = (a, b) => {
+		if (a.likes < b.likes) return -1;
+		else if (a.likes > b.likes) return 1;
+		else return 0;
+	};
+
 	useEffect(() => {
-		blogService.getAll().then((blogs) => setBlogs(blogs));
+		blogService
+			.getAll()
+			.then((blogs) => setBlogs(blogs.sort(byLikes).reverse()));
 	}, []);
 
 	useEffect(() => {
