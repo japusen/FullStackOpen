@@ -41,6 +41,7 @@ const App = () => {
 			window.localStorage.setItem("loggedBlogUser", JSON.stringify(user));
 			blogService.setToken(user.token);
 			setUser(user);
+			setNotification(null);
 		} catch (exception) {
 			setNotification("invalid username or password");
 			setTimeout(() => {
@@ -52,6 +53,7 @@ const App = () => {
 	const handleLogout = (event) => {
 		window.localStorage.removeItem("loggedBlogUser");
 		setUser(null);
+		setNotification(null);
 	};
 
 	const addBlog = async (blogObject) => {
@@ -73,10 +75,10 @@ const App = () => {
 		}
 	};
 
-	const likeBlog = async (id, updatedBlog) => {
+	const likeBlog = async (blogId, updatedBlog) => {
 		try {
-			const returnedBlog = await blogService.update(id, updatedBlog);
-			setBlogs(blogs.map((b) => (b.id === id ? updatedBlog : b)));
+			const returnedBlog = await blogService.update(blogId, updatedBlog);
+			setBlogs(blogs.map((b) => (b.id === blogId ? updatedBlog : b)));
 			setNotification(
 				`Liked ${returnedBlog.title} by ${returnedBlog.author}`
 			);
@@ -85,6 +87,22 @@ const App = () => {
 			}, 5000);
 		} catch (error) {
 			setNotification("unable to like blog");
+			setTimeout(() => {
+				setNotification(null);
+			}, 5000);
+		}
+	};
+
+	const deleteBlog = async (blogId) => {
+		try {
+			await blogService.deleteBlog(blogId);
+			setBlogs(blogs.filter((b) => b.id !== blogId));
+			setNotification("Deleted blog");
+			setTimeout(() => {
+				setNotification(null);
+			}, 5000);
+		} catch (error) {
+			setNotification("unable to delete blog");
 			setTimeout(() => {
 				setNotification(null);
 			}, 5000);
@@ -111,7 +129,16 @@ const App = () => {
 						<BlogForm createBlog={addBlog} />
 					</Togglable>
 					{blogs.map((blog) => (
-						<Blog key={blog.id} blog={blog} onLike={likeBlog} />
+						<Blog
+							key={blog.id}
+							blog={blog}
+							onLike={likeBlog}
+							onDelete={
+								blog.user.username === user.username
+									? deleteBlog
+									: null
+							}
+						/>
 					))}
 				</div>
 			)}
