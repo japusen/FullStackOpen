@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import noteService from "./services/notes";
 import loginService from "./services/login";
 import Note from "./components/Note";
 import Notification from "./components/Notification";
 import LoginForm from "./components/LoginForm";
 import NoteForm from "./components/NoteForm";
+import Togglable from "./components/Toggable";
 
 const Footer = () => {
 	const footerStyle = {
@@ -25,30 +26,20 @@ const Footer = () => {
 
 const App = () => {
 	const [notes, setNotes] = useState([]);
-	const [newNote, setNewNote] = useState("");
 	const [showAll, setShowAll] = useState(true);
 	const [errorMessage, setErrorMessage] = useState("");
-	const [username, setUsername] = useState("");
-	const [password, setPassword] = useState("");
 	const [user, setUser] = useState(null);
+	const noteFormRef = useRef();
 
-	const handleLogin = async (event) => {
-		event.preventDefault();
-
+	const handleLogin = async (credentials) => {
 		try {
-			const user = await loginService.login({
-				username,
-				password,
-			});
-
+			const user = await loginService.login(credentials);
 			window.localStorage.setItem(
 				"loggedNoteappUser",
 				JSON.stringify(user)
 			);
 			noteService.setToken(user.token);
 			setUser(user);
-			setUsername("");
-			setPassword("");
 		} catch (exception) {
 			setErrorMessage("Wrong credentials");
 			setTimeout(() => {
@@ -74,21 +65,17 @@ const App = () => {
 		}
 	}, []);
 
-	const addNote = (event) => {
-		event.preventDefault();
-		const noteObject = {
-			content: newNote,
-			important: Math.random() < 0.5,
-		};
-
-		noteService.create(noteObject).then((returnedNote) => {
+	const addNote = async (noteObject) => {
+		try {
+			const returnedNote = await noteService.create(noteObject);
 			setNotes(notes.concat(returnedNote));
-			setNewNote("");
-		});
-	};
-
-	const handleNoteChange = (event) => {
-		setNewNote(event.target.value);
+			noteFormRef.current.toggleVisibility();
+		} catch (error) {
+			setErrorMessage(`Unable to add note`);
+			setTimeout(() => {
+				setErrorMessage(null);
+			}, 5000);
+		}
 	};
 
 	const toggleImportanceOf = (id) => {
@@ -123,21 +110,15 @@ const App = () => {
 			<Notification message={errorMessage} />
 
 			{user === null ? (
-				<LoginForm
-					username={username}
-					password={password}
-					onUsernameChange={({ target }) => setUsername(target.value)}
-					onPasswordChange={({ target }) => setPassword(target.value)}
-					onLogin={handleLogin}
-				/>
+				<Togglable buttonLabel="login">
+					<LoginForm login={handleLogin} />
+				</Togglable>
 			) : (
 				<div>
 					<p>{user.name} logged in</p>
-					<NoteForm
-						newNote={newNote}
-						onNoteChange={handleNoteChange}
-						onSubmit={addNote}
-					/>
+					<Togglable buttonLabel="new note" ref={noteFormRef}>
+						<NoteForm createNote={addNote} />
+					</Togglable>
 				</div>
 			)}
 
