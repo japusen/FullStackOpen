@@ -65,6 +65,24 @@ const App = () => {
 		}
 	};
 
+	const likeBlog = async (id, updatedBlog) => {
+		try {
+			const returnedBlog = await blogService.update(id, updatedBlog);
+			setBlogs(blogs.map((b) => (b.id === id ? updatedBlog : b)));
+			setNotification(
+				`Liked ${returnedBlog.title} by ${returnedBlog.author}`
+			);
+			setTimeout(() => {
+				setNotification(null);
+			}, 5000);
+		} catch (error) {
+			setNotification("unable to like blog");
+			setTimeout(() => {
+				setNotification(null);
+			}, 5000);
+		}
+	};
+
 	return (
 		<div>
 			{user === null ? (
@@ -85,7 +103,7 @@ const App = () => {
 						<BlogForm createBlog={addBlog} />
 					</Togglable>
 					{blogs.map((blog) => (
-						<Blog key={blog.id} blog={blog} />
+						<Blog key={blog.id} blog={blog} onLike={likeBlog} />
 					))}
 				</div>
 			)}
