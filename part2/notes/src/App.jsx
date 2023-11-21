@@ -5,7 +5,7 @@ import Note from "./components/Note";
 import Notification from "./components/Notification";
 import LoginForm from "./components/LoginForm";
 import NoteForm from "./components/NoteForm";
-import Togglable from "./components/Toggable";
+import Togglable from "./components/Togglable";
 
 const Footer = () => {
 	const footerStyle = {
