@@ -57,16 +57,19 @@ describe("Blog app", function () {
 					title: "First blog",
 					author: "tester 1",
 					url: "123.com",
+					likes: 10,
 				});
 				cy.createBlog({
 					title: "Second blog",
 					author: "tester 1",
 					url: "123.com",
+					likes: 99,
 				});
 				cy.createBlog({
 					title: "Third blog",
 					author: "tester 1",
 					url: "123.com",
+					likes: 2,
 				});
 			});
 
@@ -89,7 +92,7 @@ describe("Blog app", function () {
 				cy.contains("delete");
 			});
 
-			it.only("blog can't be deleted by someone who is not the submitter", function () {
+			it("blog can't be deleted by someone who is not the submitter", function () {
 				const other = {
 					name: "Other Tester",
 					username: "other",
@@ -104,6 +107,12 @@ describe("Blog app", function () {
 				});
 				cy.contains("Third blog").contains("view").click();
 				cy.contains("delete").should("not.exist");
+			});
+
+			it.only("blogs are ordered by number of likes (descending)", function () {
+				cy.get(".blog").eq(0).should("contain", "Second blog");
+				cy.get(".blog").eq(1).should("contain", "First blog");
+				cy.get(".blog").eq(2).should("contain", "Third blog");
 			});
 		});
 	});
