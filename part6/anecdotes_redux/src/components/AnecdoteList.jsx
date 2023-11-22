@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useDispatch, useSelector } from "react-redux";
+import anecdoteService from "../services/anecdotes";
 import { voteForAnecdote } from "../reducers/anecdoteReducer";
 import {
 	clearNotification,
@@ -26,6 +27,21 @@ const AnecdoteList = () => {
 			.sort((a, b) => b.votes - a.votes)
 	);
 
+	const vote = async (id) => {
+		const anecdoteToUpdate = anecdotes.find(
+			(anecdote) => anecdote.id === id
+		);
+		const votedAnecdote = await anecdoteService.update(id, {
+			...anecdoteToUpdate,
+			votes: anecdoteToUpdate.votes + 1,
+		});
+		dispatch(voteForAnecdote(votedAnecdote));
+		dispatch(setNotification(`voted for '${votedAnecdote.content}'`));
+		setTimeout(() => {
+			dispatch(clearNotification());
+		}, 2000);
+	};
+
 	return (
 		<ul>
 			{anecdotes.map((anecdote) => (
@@ -33,13 +49,7 @@ const AnecdoteList = () => {
 					key={anecdote.id}
 					anecdote={anecdote}
 					handleClick={() => {
-						dispatch(voteForAnecdote(anecdote.id));
-						dispatch(
-							setNotification(`voted for '${anecdote.content}'`)
-						);
-						setTimeout(() => {
-							dispatch(clearNotification());
-						}, 2000);
+						vote(anecdote.id);
 					}}
 				/>
 			))}
