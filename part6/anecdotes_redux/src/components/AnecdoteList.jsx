@@ -16,7 +16,11 @@ const Anecdote = ({ anecdote, handleClick }) => {
 
 const AnecdoteList = () => {
 	const dispatch = useDispatch();
-	const anecdotes = useSelector((state) => state);
+	const anecdotes = useSelector(({ filter, anecdotes }) =>
+		filter !== ""
+			? anecdotes.filter((anecdote) => anecdote.content.includes(filter))
+			: anecdotes
+	);
 	const sortedAnecdotes = anecdotes
 		.sort((a, b) => a.votes - b.votes)
 		.reverse();
