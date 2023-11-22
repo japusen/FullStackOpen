@@ -79,9 +79,31 @@ describe("Blog app", function () {
 				cy.contains("like").click();
 			});
 
-			it.only("user can show details of a blog then hide the details", function () {
+			it("user can show details of a blog then hide the details", function () {
 				cy.contains("Third blog").contains("view").click();
 				cy.contains("hide").click();
+			});
+
+			it("blog can be deleted by creator", function () {
+				cy.contains("Third blog").contains("view").click();
+				cy.contains("delete");
+			});
+
+			it.only("blog can't be deleted by someone who is not the submitter", function () {
+				const other = {
+					name: "Other Tester",
+					username: "other",
+					password: "other",
+				};
+				cy.request("POST", `${Cypress.env("BACKEND")}/users`, other);
+
+				cy.contains("logout").click();
+				cy.login({
+					username: other.username,
+					password: other.password,
+				});
+				cy.contains("Third blog").contains("view").click();
+				cy.contains("delete").should("not.exist");
 			});
 		});
 	});
