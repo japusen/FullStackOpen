@@ -5,10 +5,16 @@ import { getAnecdotes, updateAnecdote } from "./requests";
 
 const App = () => {
 	const queryClient = useQueryClient();
+
 	const voteMutation = useMutation({
 		mutationFn: updateAnecdote,
-		onSuccess: () =>
-			queryClient.invalidateQueries({ queryKey: ["anecdotes"] }),
+		onSuccess: (changedAnecdote) => {
+			const anecdotes = queryClient.getQueryData(["anecdotes"]);
+			const updatedAnecdotes = anecdotes.map((anecdote) =>
+				anecdote.id === changedAnecdote.id ? changedAnecdote : anecdote
+			);
+			queryClient.setQueryData(["anecdotes"], updatedAnecdotes);
+		},
 	});
 
 	const handleVote = (anecdote) => {
@@ -21,6 +27,7 @@ const App = () => {
 	const result = useQuery({
 		queryKey: ["anecdotes"],
 		queryFn: getAnecdotes,
+		refetchOnWindowFocus: false,
 	});
 
 	if (result.isLoading) {
