@@ -17,17 +17,14 @@ const Anecdote = ({ anecdote, handleClick }) => {
 const AnecdoteList = () => {
 	const dispatch = useDispatch();
 	const anecdotes = useSelector(({ filter, anecdotes }) =>
-		filter !== ""
-			? anecdotes.filter((anecdote) => anecdote.content.includes(filter))
-			: anecdotes
+		anecdotes
+			.filter((anecdote) => anecdote.content.includes(filter))
+			.sort((a, b) => b.votes - a.votes)
 	);
-	const sortedAnecdotes = anecdotes
-		.sort((a, b) => a.votes - b.votes)
-		.reverse();
 
 	return (
 		<ul>
-			{sortedAnecdotes.map((anecdote) => (
+			{anecdotes.map((anecdote) => (
 				<Anecdote
 					key={anecdote.id}
 					anecdote={anecdote}
