@@ -46,9 +46,43 @@ describe("Blog app", function () {
 			cy.contains("new blog number 1 tester");
 		});
 
-		it.only("user can logout", function () {
+		it("user can logout", function () {
 			cy.contains("logout").click();
 			cy.contains("log in to application");
+		});
+
+		describe("when blogs exist", function () {
+			beforeEach(function () {
+				cy.createBlog({
+					title: "First blog",
+					author: "tester 1",
+					url: "123.com",
+				});
+				cy.createBlog({
+					title: "Second blog",
+					author: "tester 1",
+					url: "123.com",
+				});
+				cy.createBlog({
+					title: "Third blog",
+					author: "tester 1",
+					url: "123.com",
+				});
+			});
+
+			it("user can show details of a blog", function () {
+				cy.contains("Third blog").contains("view").click();
+			});
+
+			it("user can like a blog", function () {
+				cy.contains("Third blog").contains("view").click();
+				cy.contains("like").click();
+			});
+
+			it.only("user can show details of a blog then hide the details", function () {
+				cy.contains("Third blog").contains("view").click();
+				cy.contains("hide").click();
+			});
 		});
 	});
 });
