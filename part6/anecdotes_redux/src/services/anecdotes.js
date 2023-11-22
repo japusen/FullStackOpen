@@ -7,6 +7,11 @@ const getAll = async () => {
 	return response.data;
 };
 
+const get = async (id) => {
+	const response = await axios.get(`${baseUrl}/${id}`);
+	return response.data;
+};
+
 const create = async (content) => {
 	const object = { content, votes: 0 };
 	const response = await axios.post(baseUrl, object);
@@ -18,4 +23,4 @@ const update = async (id, updatedAnecdote) => {
 	return response.data;
 };
 
-export default { getAll, create, update };
+export default { getAll, get, create, update };
