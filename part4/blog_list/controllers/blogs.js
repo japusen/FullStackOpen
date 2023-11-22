@@ -1,7 +1,6 @@
 const blogsRouter = require("express").Router();
 const Blog = require("../models/blog");
-const User = require("../models/user");
-const middleware = require("../utils/middleware");
+const { userExtractor } = require("../utils/middleware");
 
 blogsRouter.get("/", async (request, response) => {
 	const blogs = await Blog.find({}).populate("user", {
@@ -11,7 +10,7 @@ blogsRouter.get("/", async (request, response) => {
 	response.json(blogs);
 });
 
-blogsRouter.post("/", middleware.userExtractor, async (request, response) => {
+blogsRouter.post("/", userExtractor, async (request, response) => {
 	const body = request.body;
 
 	const user = request.user;
@@ -33,33 +32,24 @@ blogsRouter.post("/", middleware.userExtractor, async (request, response) => {
 	user.blogs = user.blogs.concat(savedBlog._id);
 	await user.save();
 
+	savedBlog = await Blog.findById(savedBlog._id).populate("user");
 	response.status(201).json(savedBlog);
 });
 
-blogsRouter.delete(
-	"/:id",
-	middleware.userExtractor,
-	async (request, response) => {
-		const blog = await Blog.findById(request.params.id);
-		const user = request.user;
+blogsRouter.delete("/:id", userExtractor, async (request, response) => {
+	const blog = await Blog.findById(request.params.id);
+	const user = request.user;
 
-		if (!blog) {
-			return response.status(401).json({ error: "blog does not exist" });
-		}
-
-		if (!user || user.id !== blog.user.toString()) {
-			return response.status(401).json({ error: "Unauthorized " });
-		}
-
-		user.blogs = user.blogs.filter(
-			(b) => b.toString() !== blog.id.toString()
-		);
-
-		await user.save();
-		await blog.remove();
-		response.status(204).end();
+	if (!user || user.id.toString() !== blog.user.toString()) {
+		return response.status(401).json({ error: "Unauthorized " });
 	}
-);
+
+	user.blogs = user.blogs.filter((b) => b.toString() !== blog.id.toString());
+
+	await user.save();
+	await blog.remove();
+	response.status(204).end();
+});
 
 blogsRouter.put("/:id", async (request, response) => {
 	const body = request.body;
@@ -75,6 +65,7 @@ blogsRouter.put("/:id", async (request, response) => {
 	const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, {
 		new: true,
 	});
+	updatedBlog = await Blog.findById(updatedBlog._id).populate("user");
 	response.json(updatedBlog);
 });
 
