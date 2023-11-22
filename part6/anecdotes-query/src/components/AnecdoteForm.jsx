@@ -8,15 +8,24 @@ const AnecdoteForm = () => {
 
 	const newAnecdoteMutation = useMutation({
 		mutationFn: creatAnecdote,
-		onSuccess: (newAmecdote) => {
+		onSuccess: (newAnecdote) => {
 			const anecdotes = queryClient.getQueryData(["anecdotes"]);
 			queryClient.setQueryData(
 				["anecdotes"],
-				anecdotes.concat(newAmecdote)
+				anecdotes.concat(newAnecdote)
 			);
 			dispatch({
 				type: "UPDATE",
-				payload: `created anecdote '${newAmecdote.content}'`,
+				payload: `created anecdote '${newAnecdote.content}'`,
+			});
+			setTimeout(() => {
+				dispatch({ type: "CLEAR" });
+			}, 3000);
+		},
+		onError: (error) => {
+			dispatch({
+				type: "UPDATE",
+				payload: error.response.data.error,
 			});
 			setTimeout(() => {
 				dispatch({ type: "CLEAR" });
