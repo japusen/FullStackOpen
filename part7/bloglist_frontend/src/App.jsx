@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import Blog from "./components/Blog";
+import BlogList from "./components/BlogList";
 import LoginForm from "./components/LoginForm";
 import BlogForm from "./components/BlogForm";
 import Notification from "./components/Notification";
@@ -8,24 +8,16 @@ import loginService from "./services/login";
 import Togglable from "./components/Togglable";
 import { useDispatch } from "react-redux";
 import { setNotification } from "./reducers/notificationReducer";
+import { initializeBlogs } from "./reducers/blogReducer";
 
 const App = () => {
 	const dispatch = useDispatch();
 
-	const [blogs, setBlogs] = useState([]);
 	const [user, setUser] = useState(null);
 	const blogFormRef = useRef();
 
-	const byLikes = (a, b) => {
-		if (a.likes < b.likes) return -1;
-		else if (a.likes > b.likes) return 1;
-		else return 0;
-	};
-
 	useEffect(() => {
-		blogService
-			.getAll()
-			.then((blogs) => setBlogs(blogs.sort(byLikes).reverse()));
+		dispatch(initializeBlogs());
 	}, []);
 
 	useEffect(() => {
@@ -56,47 +48,6 @@ const App = () => {
 		dispatch(setNotification(""));
 	};
 
-	const addBlog = async (blogObject) => {
-		try {
-			const returnedBlog = await blogService.create(blogObject);
-			setBlogs(blogs.concat({ ...returnedBlog, user: user }));
-			dispatch(
-				setNotification(
-					`added blog: ${returnedBlog.title} by ${returnedBlog.author}`
-				)
-			);
-			blogFormRef.current.toggleVisibility();
-		} catch (exception) {
-			dispatch(setNotification(exception.response.data.error));
-		}
-	};
-
-	const likeBlog = async (blogId, updatedBlog) => {
-		try {
-			const returnedBlog = await blogService.update(blogId, updatedBlog);
-			setBlogs(blogs.map((b) => (b.id === blogId ? updatedBlog : b)));
-			dispatch(
-				setNotification(
-					`Liked ${returnedBlog.title} by ${returnedBlog.author}`
-				)
-			);
-		} catch (error) {
-			dispatch(setNotification("unable to like blog"));
-		}
-	};
-
-	const deleteBlog = async (blog) => {
-		try {
-			await blogService.deleteBlog(blog.id);
-			setBlogs(blogs.filter((b) => b.id !== blog.id));
-			dispatch(
-				setNotification(`Deleted '${blog.title}' by ${blog.author}`)
-			);
-		} catch (error) {
-			dispatch(setNotification("unable to delete blog"));
-		}
-	};
-
 	return (
 		<div>
 			{user === null ? (
@@ -114,20 +65,14 @@ const App = () => {
 					</p>
 					<Notification />
 					<Togglable buttonLabel="new blog" ref={blogFormRef}>
-						<BlogForm createBlog={addBlog} />
-					</Togglable>
-					{blogs.map((blog) => (
-						<Blog
-							key={blog.id}
-							blog={blog}
-							onLike={likeBlog}
-							onDelete={
-								blog.user.username === user.username
-									? deleteBlog
-									: null
-							}
+						<BlogForm
+							user={user}
+							toggle={() => {
+								blogFormRef.current.toggleVisibility();
+							}}
 						/>
-					))}
+					</Togglable>
+					<BlogList user={user} />
 				</div>
 			)}
 		</div>

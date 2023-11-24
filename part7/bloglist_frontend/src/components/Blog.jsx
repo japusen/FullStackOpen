@@ -19,10 +19,7 @@ const Blog = ({ blog, onLike, onDelete }) => {
 	};
 
 	const like = () => {
-		onLike(blog.id, {
-			...blog,
-			likes: blog.likes + 1,
-		});
+		onLike(blog);
 	};
 
 	const deleteBlog = () => {
