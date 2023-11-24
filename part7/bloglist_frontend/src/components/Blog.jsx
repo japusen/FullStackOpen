@@ -27,13 +27,13 @@ const Blog = ({ blog, onLike, onDelete }) => {
 
 	const deleteBlog = () => {
 		if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
-			onDelete(blog.id);
+			onDelete(blog);
 		}
 	};
 
 	return (
 		<div style={blogStyle}>
-			<div style={hideWhenVisible} class="blog" id="view">
+			<div style={hideWhenVisible} className="blog" id="view">
 				{blog.title} {blog.author}
 				<button onClick={toggleVisibility}>view</button>
 			</div>

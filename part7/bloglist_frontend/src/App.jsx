@@ -6,11 +6,14 @@ import Notification from "./components/Notification";
 import blogService from "./services/blogs";
 import loginService from "./services/login";
 import Togglable from "./components/Togglable";
+import { useDispatch } from "react-redux";
+import { setNotification } from "./reducers/notificationReducer";
 
 const App = () => {
+	const dispatch = useDispatch();
+
 	const [blogs, setBlogs] = useState([]);
 	const [user, setUser] = useState(null);
-	const [notification, setNotification] = useState(null);
 	const blogFormRef = useRef();
 
 	const byLikes = (a, b) => {
@@ -41,37 +44,30 @@ const App = () => {
 			window.localStorage.setItem("loggedBlogUser", JSON.stringify(user));
 			blogService.setToken(user.token);
 			setUser(user);
-			setNotification(null);
+			dispatch(setNotification(""));
 		} catch (exception) {
-			setNotification("invalid username or password");
-			setTimeout(() => {
-				setNotification(null);
-			}, 5000);
+			dispatch(setNotification("invalid username or password"));
 		}
 	};
 
 	const handleLogout = (event) => {
 		window.localStorage.removeItem("loggedBlogUser");
 		setUser(null);
-		setNotification(null);
+		dispatch(setNotification(""));
 	};
 
 	const addBlog = async (blogObject) => {
 		try {
 			const returnedBlog = await blogService.create(blogObject);
 			setBlogs(blogs.concat({ ...returnedBlog, user: user }));
-			setNotification(
-				`added blog: ${returnedBlog.title} by ${returnedBlog.author}`
+			dispatch(
+				setNotification(
+					`added blog: ${returnedBlog.title} by ${returnedBlog.author}`
+				)
 			);
 			blogFormRef.current.toggleVisibility();
-			setTimeout(() => {
-				setNotification(null);
-			}, 5000);
 		} catch (exception) {
-			setNotification(exception.response.data.error);
-			setTimeout(() => {
-				setNotification(null);
-			}, 5000);
+			dispatch(setNotification(exception.response.data.error));
 		}
 	};
 
@@ -79,33 +75,25 @@ const App = () => {
 		try {
 			const returnedBlog = await blogService.update(blogId, updatedBlog);
 			setBlogs(blogs.map((b) => (b.id === blogId ? updatedBlog : b)));
-			setNotification(
-				`Liked ${returnedBlog.title} by ${returnedBlog.author}`
+			dispatch(
+				setNotification(
+					`Liked ${returnedBlog.title} by ${returnedBlog.author}`
+				)
 			);
-			setTimeout(() => {
-				setNotification(null);
-			}, 5000);
 		} catch (error) {
-			setNotification("unable to like blog");
-			setTimeout(() => {
-				setNotification(null);
-			}, 5000);
+			dispatch(setNotification("unable to like blog"));
 		}
 	};
 
-	const deleteBlog = async (blogId) => {
+	const deleteBlog = async (blog) => {
 		try {
-			await blogService.deleteBlog(blogId);
-			setBlogs(blogs.filter((b) => b.id !== blogId));
-			setNotification("Deleted blog");
-			setTimeout(() => {
-				setNotification(null);
-			}, 5000);
+			await blogService.deleteBlog(blog.id);
+			setBlogs(blogs.filter((b) => b.id !== blog.id));
+			dispatch(
+				setNotification(`Deleted '${blog.title}' by ${blog.author}`)
+			);
 		} catch (error) {
-			setNotification("unable to delete blog");
-			setTimeout(() => {
-				setNotification(null);
-			}, 5000);
+			dispatch(setNotification("unable to delete blog"));
 		}
 	};
 
@@ -114,7 +102,7 @@ const App = () => {
 			{user === null ? (
 				<div>
 					<h1>log in to application</h1>
-					<Notification notification={notification} />
+					<Notification />
 					<LoginForm login={handleLogin} />
 				</div>
 			) : (
@@ -124,7 +112,7 @@ const App = () => {
 						Logged in as {user.name}
 						<button onClick={handleLogout}>logout</button>
 					</p>
-					<Notification notification={notification} />
+					<Notification />
 					<Togglable buttonLabel="new blog" ref={blogFormRef}>
 						<BlogForm createBlog={addBlog} />
 					</Togglable>
