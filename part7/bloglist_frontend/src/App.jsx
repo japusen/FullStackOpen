@@ -19,6 +19,7 @@ import Home from "./components/Home";
 import Users from "./components/Users";
 import User from "./components/User";
 import Notification from "./components/Notification";
+import Blog from "./components/Blog";
 
 const App = () => {
 	const dispatch = useDispatch();
@@ -30,6 +31,11 @@ const App = () => {
 	const userMatch = useMatch("/user/:id");
 	const selectedUser = userMatch
 		? users.find((user) => user.id === String(userMatch.params.id))
+		: null;
+
+	const blogMatch = useMatch("/blog/:id");
+	const selectedBlog = blogMatch
+		? blogs.find((blog) => blog.id === String(blogMatch.params.id))
 		: null;
 
 	const logoutUser = () => {
@@ -55,7 +61,9 @@ const App = () => {
 					<h1>blogs</h1>
 					<p>
 						Logged in as {user.name}
-						<button onClick={logoutUser}>logout</button>
+						<button style={{ marginLeft: 10 }} onClick={logoutUser}>
+							logout
+						</button>
 					</p>
 					<Notification />
 				</>
@@ -74,14 +82,10 @@ const App = () => {
 					path="/user/:id"
 					element={<User user={selectedUser} />}
 				/>
-				{/* <Route path="/notes/:id" element={<Note note={note} />} />
-		<Route path="/notes" element={<Notes notes={notes} />} />
-		<Route
-			path="/users"
-			element={user ? <Users /> : <Navigate replace to="/login" />}
-		/>
-		<Route path="/login" element={<Login onLogin={login} />} />
-		 */}
+				<Route
+					path="/blog/:id"
+					element={<Blog blog={selectedBlog} />}
+				/>
 			</Routes>
 		</div>
 	);
