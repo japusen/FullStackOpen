@@ -1,17 +1,31 @@
-import { useEffect, useRef } from "react";
-import BlogList from "./components/BlogList";
-import LoginForm from "./components/LoginForm";
-import BlogForm from "./components/BlogForm";
-import Notification from "./components/Notification";
-import Togglable from "./components/Togglable";
 import { useDispatch, useSelector } from "react-redux";
-import { initializeBlogs } from "./reducers/blogReducer";
 import { initializeUser, logout } from "./reducers/userReducer";
+import { initializeBlogs } from "./reducers/blogReducer";
+import { getAllUsers } from "./reducers/usersReducer";
+import { useEffect } from "react";
+import {
+	BrowserRouter as Router,
+	Routes,
+	Route,
+	Link,
+	Navigate,
+	useParams,
+	useNavigate,
+	useMatch,
+} from "react-router-dom";
+
+import Login from "./components/Login";
+import Home from "./components/Home";
+import Users from "./components/Users";
+import Notification from "./components/Notification";
 
 const App = () => {
 	const dispatch = useDispatch();
-	const blogFormRef = useRef();
 	const user = useSelector(({ user }) => user);
+
+	const logoutUser = () => {
+		dispatch(logout());
+	};
 
 	useEffect(() => {
 		dispatch(initializeBlogs());
@@ -21,36 +35,41 @@ const App = () => {
 		dispatch(initializeUser());
 	}, []);
 
-	const logoutUser = () => {
-		dispatch(logout());
-	};
-
-	const toggleFormVisibility = () => {
-		blogFormRef.current.toggleVisibility();
-	};
+	useEffect(() => {
+		dispatch(getAllUsers());
+	}, []);
 
 	return (
 		<div>
-			{user === null ? (
-				<div>
-					<h1>log in to application</h1>
-					<Notification />
-					<LoginForm />
-				</div>
-			) : (
-				<div>
+			{user && (
+				<>
 					<h1>blogs</h1>
 					<p>
 						Logged in as {user.name}
 						<button onClick={logoutUser}>logout</button>
 					</p>
 					<Notification />
-					<Togglable buttonLabel="new blog" ref={blogFormRef}>
-						<BlogForm toggle={toggleFormVisibility} />
-					</Togglable>
-					<BlogList />
-				</div>
+				</>
 			)}
+			<Routes>
+				<Route
+					path="/"
+					element={user ? <Home /> : <Navigate replace to="/login" />}
+				/>
+				<Route
+					path="/login"
+					element={user ? <Navigate replace to="/" /> : <Login />}
+				/>
+				<Route path="/users" element={<Users />} />
+				{/* <Route path="/notes/:id" element={<Note note={note} />} />
+		<Route path="/notes" element={<Notes notes={notes} />} />
+		<Route
+			path="/users"
+			element={user ? <Users /> : <Navigate replace to="/login" />}
+		/>
+		<Route path="/login" element={<Login onLogin={login} />} />
+		 */}
+			</Routes>
 		</div>
 	);
 };
