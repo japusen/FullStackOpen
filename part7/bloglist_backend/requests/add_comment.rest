@@ -1,0 +1,6 @@
+post http://localhost:3001/api/blogs/65626a456b169366ddac83de/comments
+Content-Type: application/json
+
+{
+    "comment": ""
+}

@@ -126,6 +126,23 @@ describe("addition of a new blog", () => {
 		expect(savedBlog.likes).toEqual(0);
 	});
 
+	test("starts with no comments", async () => {
+		const newBlog = {
+			title: "async/await simplifies making async calls",
+			url: "test.com",
+		};
+
+		const response = await api
+			.post("/api/blogs")
+			.set("Authorization", "Bearer " + token)
+			.send(newBlog)
+			.expect(201)
+			.expect("Content-Type", /application\/json/);
+
+		const savedBlog = response.body;
+		expect(savedBlog.comments).toEqual([]);
+	});
+
 	test("fails if title and/or url are missing", async () => {
 		const missingTitle = {
 			url: "test.com",
@@ -227,11 +244,35 @@ describe("updating a blog", () => {
 			.put(`/api/blogs/${updatedBlog.id}`)
 			.send(updatedBlog);
 
-		const returnedNote = response.body;
-		expect(returnedNote.likes).toEqual(999);
+		const returnedBlog = response.body;
+		expect(returnedBlog.likes).toEqual(999);
 
 		const blogsAfter = await helper.blogsInDb();
 		expect(blogsAfter).toHaveLength(helper.initialBlogs.length);
+	});
+
+	test("by adding a comment", async () => {
+		const blogs = await helper.blogsInDb();
+		const comment = "hello world";
+
+		const response = await api
+			.post(`/api/blogs/${blogs[0].id}/comments`)
+			.send({ comment: comment });
+
+		const returnedBlog = response.body;
+		expect(returnedBlog.comments).toHaveLength(1);
+		expect(returnedBlog.comments[0]).toEqual(comment);
+
+		const blogsAfter = await helper.blogsInDb();
+		expect(blogsAfter).toHaveLength(helper.initialBlogs.length);
+	});
+
+	test("fails by adding a blank comment", async () => {
+		const blogs = await helper.blogsInDb();
+		await api
+			.post(`/api/blogs/${blogs[0].id}/comments`)
+			.send({ comment: "" })
+			.expect(400);
 	});
 });
 
