@@ -17,11 +17,20 @@ import {
 import Login from "./components/Login";
 import Home from "./components/Home";
 import Users from "./components/Users";
+import User from "./components/User";
 import Notification from "./components/Notification";
 
 const App = () => {
 	const dispatch = useDispatch();
 	const user = useSelector(({ user }) => user);
+
+	const blogs = useSelector(({ blogs }) => blogs);
+	const users = useSelector(({ users }) => users);
+
+	const userMatch = useMatch("/user/:id");
+	const selectedUser = userMatch
+		? users.find((user) => user.id === String(userMatch.params.id))
+		: null;
 
 	const logoutUser = () => {
 		dispatch(logout());
@@ -61,6 +70,10 @@ const App = () => {
 					element={user ? <Navigate replace to="/" /> : <Login />}
 				/>
 				<Route path="/users" element={<Users />} />
+				<Route
+					path="/user/:id"
+					element={<User user={selectedUser} />}
+				/>
 				{/* <Route path="/notes/:id" element={<Note note={note} />} />
 		<Route path="/notes" element={<Notes notes={notes} />} />
 		<Route
