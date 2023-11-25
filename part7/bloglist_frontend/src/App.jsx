@@ -54,19 +54,33 @@ const App = () => {
 		dispatch(getAllUsers());
 	}, []);
 
+	const padding = {
+		paddingLeft: 10,
+	};
+
+	const navStyle = {
+		display: "flex",
+		alignItems: "center",
+		gap: 10,
+		background: "gray",
+		paddingLeft: 10,
+		paddingRight: 10,
+	};
+
 	return (
 		<div>
 			{user && (
-				<>
-					<h1>blogs</h1>
-					<p>
-						Logged in as {user.name}
-						<button style={{ marginLeft: 10 }} onClick={logoutUser}>
-							logout
-						</button>
-					</p>
+				<div>
+					<div style={navStyle}>
+						<Link to="/">blogs</Link>
+						<Link to="/users">users</Link>
+						<div style={{ flex: 1 }} />
+						<p>Logged in as {user.name}</p>
+						<button onClick={logoutUser}>logout</button>
+					</div>
+					<h1>blog app</h1>
 					<Notification />
-				</>
+				</div>
 			)}
 			<Routes>
 				<Route
