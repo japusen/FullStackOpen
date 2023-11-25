@@ -1,6 +1,11 @@
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { like, deleteBlog } from "../reducers/blogReducer";
 
-const Blog = ({ blog, onLike, onDelete }) => {
+const Blog = ({ blog }) => {
+	const dispatch = useDispatch();
+	const user = useSelector(({ user }) => user);
+
 	const [visible, setVisible] = useState(false);
 
 	const hideWhenVisible = { display: visible ? "none" : "" };
@@ -18,13 +23,13 @@ const Blog = ({ blog, onLike, onDelete }) => {
 		marginBottom: 5,
 	};
 
-	const like = () => {
-		onLike(blog);
+	const likeBlog = async () => {
+		dispatch(like(blog));
 	};
 
-	const deleteBlog = () => {
+	const removeBlog = () => {
 		if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
-			onDelete(blog);
+			dispatch(deleteBlog(blog));
 		}
 	};
 
@@ -40,10 +45,12 @@ const Blog = ({ blog, onLike, onDelete }) => {
 				<div>{blog.url}</div>
 				<div>
 					Likes {blog.likes}
-					<button onClick={like}>like</button>
+					<button onClick={likeBlog}>like</button>
 				</div>
 				<div>{blog.user.username}</div>
-				{onDelete && <button onClick={deleteBlog}>delete</button>}
+				{blog.user.username === user.username && (
+					<button onClick={removeBlog}>delete</button>
+				)}
 			</div>
 		</div>
 	);

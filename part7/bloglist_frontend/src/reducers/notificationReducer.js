@@ -20,7 +20,7 @@ export const setNotification = (notification) => {
 	return async (dispatch) => {
 		dispatch(updateNotification(notification));
 		setTimeout(() => {
-			dispatch(clearNotification(""));
+			dispatch(clearNotification());
 		}, 3000);
 	};
 };

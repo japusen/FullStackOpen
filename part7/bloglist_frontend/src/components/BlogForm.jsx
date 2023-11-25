@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { setNotification } from "../reducers/notificationReducer";
+import { useDispatch, useSelector } from "react-redux";
 import { createBlog } from "../reducers/blogReducer";
 
-const BlogForm = ({ user, toggle }) => {
+const BlogForm = ({ toggle }) => {
 	const dispatch = useDispatch();
+	const user = useSelector(({ user }) => user);
 
 	const [title, setTitle] = useState("");
 	const [author, setAuthor] = useState("");
@@ -12,26 +12,20 @@ const BlogForm = ({ user, toggle }) => {
 
 	const onCreate = (event) => {
 		event.preventDefault();
-		addBlog({
-			title,
-			author,
-			url,
-		});
+		dispatch(
+			createBlog(
+				{
+					title,
+					author,
+					url,
+				},
+				user
+			)
+		);
+		toggle();
 		setTitle("");
 		setAuthor("");
 		setUrl("");
-	};
-
-	const addBlog = async (blog) => {
-		try {
-			dispatch(createBlog(blog, user));
-			dispatch(
-				setNotification(`added blog: ${blog.title} by ${blog.author}`)
-			);
-			toggle();
-		} catch (exception) {
-			dispatch(setNotification(exception));
-		}
 	};
 
 	return (

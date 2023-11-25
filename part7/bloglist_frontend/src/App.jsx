@@ -1,51 +1,32 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import BlogList from "./components/BlogList";
 import LoginForm from "./components/LoginForm";
 import BlogForm from "./components/BlogForm";
 import Notification from "./components/Notification";
-import blogService from "./services/blogs";
-import loginService from "./services/login";
 import Togglable from "./components/Togglable";
-import { useDispatch } from "react-redux";
-import { setNotification } from "./reducers/notificationReducer";
+import { useDispatch, useSelector } from "react-redux";
 import { initializeBlogs } from "./reducers/blogReducer";
+import { initializeUser, logout } from "./reducers/userReducer";
 
 const App = () => {
 	const dispatch = useDispatch();
-
-	const [user, setUser] = useState(null);
 	const blogFormRef = useRef();
+	const user = useSelector(({ user }) => user);
 
 	useEffect(() => {
 		dispatch(initializeBlogs());
 	}, []);
 
 	useEffect(() => {
-		const loggedUserJSON = window.localStorage.getItem("loggedBlogUser");
-		if (loggedUserJSON) {
-			const user = JSON.parse(loggedUserJSON);
-			setUser(user);
-			blogService.setToken(user.token);
-		}
+		dispatch(initializeUser());
 	}, []);
 
-	const handleLogin = async (userObject) => {
-		try {
-			const user = await loginService.login(userObject);
-
-			window.localStorage.setItem("loggedBlogUser", JSON.stringify(user));
-			blogService.setToken(user.token);
-			setUser(user);
-			dispatch(setNotification(""));
-		} catch (exception) {
-			dispatch(setNotification("invalid username or password"));
-		}
+	const logoutUser = () => {
+		dispatch(logout());
 	};
 
-	const handleLogout = (event) => {
-		window.localStorage.removeItem("loggedBlogUser");
-		setUser(null);
-		dispatch(setNotification(""));
+	const toggleFormVisibility = () => {
+		blogFormRef.current.toggleVisibility();
 	};
 
 	return (
@@ -54,25 +35,20 @@ const App = () => {
 				<div>
 					<h1>log in to application</h1>
 					<Notification />
-					<LoginForm login={handleLogin} />
+					<LoginForm />
 				</div>
 			) : (
 				<div>
 					<h1>blogs</h1>
 					<p>
 						Logged in as {user.name}
-						<button onClick={handleLogout}>logout</button>
+						<button onClick={logoutUser}>logout</button>
 					</p>
 					<Notification />
 					<Togglable buttonLabel="new blog" ref={blogFormRef}>
-						<BlogForm
-							user={user}
-							toggle={() => {
-								blogFormRef.current.toggleVisibility();
-							}}
-						/>
+						<BlogForm toggle={toggleFormVisibility} />
 					</Togglable>
-					<BlogList user={user} />
+					<BlogList />
 				</div>
 			)}
 		</div>
