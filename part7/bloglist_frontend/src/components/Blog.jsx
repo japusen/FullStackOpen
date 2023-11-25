@@ -1,5 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { like, deleteBlog } from "../reducers/blogReducer";
+import CommentForm from "./CommentForm";
 
 const Blog = ({ blog }) => {
 	const dispatch = useDispatch();
@@ -46,6 +47,14 @@ const Blog = ({ blog }) => {
 					</button>
 				)}
 			</div>
+			<h3 style={{ marginBottom: 0 }}>comments</h3>
+			<CommentForm id={blog.id} />
+			<p style={{ margin: 0 }}>
+				number of comments {blog.comments.length}
+			</p>
+			{blog.comments.map((comment, index) => (
+				<li key={index}>{comment}</li>
+			))}
 		</div>
 	);
 };

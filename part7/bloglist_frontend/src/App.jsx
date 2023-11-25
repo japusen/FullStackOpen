@@ -4,7 +4,6 @@ import { initializeBlogs } from "./reducers/blogReducer";
 import { getAllUsers } from "./reducers/usersReducer";
 import { useEffect } from "react";
 import {
-	BrowserRouter as Router,
 	Routes,
 	Route,
 	Link,
@@ -53,10 +52,6 @@ const App = () => {
 	useEffect(() => {
 		dispatch(getAllUsers());
 	}, []);
-
-	const padding = {
-		paddingLeft: 10,
-	};
 
 	const navStyle = {
 		display: "flex",
