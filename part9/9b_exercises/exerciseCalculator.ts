@@ -1,4 +1,4 @@
-interface Result {
+export interface Result {
 	periodLength: number;
 	trainingDays: number;
 	success: boolean;
@@ -13,7 +13,8 @@ interface ExerciseValues {
 
 const parseExerciseArguments = (args: string[]): ExerciseValues => {
 	if (args.length < 4) throw new Error("Not enough arguments");
-	const [a, b, target, ...hours] = args;
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const [_a, _b, target, ...hours] = args;
 	const exerciseHours = hours.map((v) => Number(v));
 	if (!isNaN(Number(target)) && !exerciseHours.some(isNaN)) {
 		return {
@@ -25,7 +26,7 @@ const parseExerciseArguments = (args: string[]): ExerciseValues => {
 	}
 };
 
-const calculateExercises = (
+export const calculateExercises = (
 	exerciseHours: number[],
 	target: number
 ): Result => {
@@ -41,7 +42,7 @@ const calculateExercises = (
 		}
 	});
 
-	let average = totalHours / periodLength;
+	const average = totalHours / periodLength;
 
 	return {
 		periodLength,

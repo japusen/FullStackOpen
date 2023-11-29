@@ -1,0 +1,6 @@
+post http://localhost:3001/exercises
+Content-Type: application/json
+
+{
+  "target": 2
+}
