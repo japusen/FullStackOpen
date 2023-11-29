@@ -19,6 +19,7 @@ import Users from "./components/Users";
 import User from "./components/User";
 import Notification from "./components/Notification";
 import Blog from "./components/Blog";
+import { AppBar, Button, Toolbar, Container } from "@mui/material";
 
 const App = () => {
 	const dispatch = useDispatch();
@@ -63,40 +64,66 @@ const App = () => {
 	};
 
 	return (
-		<div>
-			{user && (
-				<div>
-					<div style={navStyle}>
-						<Link to="/">blogs</Link>
-						<Link to="/users">users</Link>
-						<div style={{ flex: 1 }} />
-						<p>Logged in as {user.name}</p>
-						<button onClick={logoutUser}>logout</button>
+		<Container>
+			<div>
+				{user && (
+					<div>
+						<AppBar position="static">
+							<Toolbar
+								style={{
+									display: "flex",
+								}}
+							>
+								<Button color="inherit">
+									<Link to="/">blogs</Link>
+								</Button>
+								<Button color="inherit">
+									<Link to="/users">users</Link>
+								</Button>
+								<div
+									style={{
+										display: "flex",
+										alignItems: "Center",
+										gap: 10,
+										flex: 1,
+										justifyContent: "flex-end",
+									}}
+								>
+									<p>Logged in as {user.name}</p>
+									<button onClick={logoutUser}>logout</button>
+								</div>
+								<div>
+									<div style={navStyle}></div>
+								</div>
+							</Toolbar>
+						</AppBar>
+						<h1>blog app</h1>
+						<Notification />
 					</div>
-					<h1>blog app</h1>
-					<Notification />
-				</div>
-			)}
-			<Routes>
-				<Route
-					path="/"
-					element={user ? <Home /> : <Navigate replace to="/login" />}
-				/>
-				<Route
-					path="/login"
-					element={user ? <Navigate replace to="/" /> : <Login />}
-				/>
-				<Route path="/users" element={<Users />} />
-				<Route
-					path="/user/:id"
-					element={<User user={selectedUser} />}
-				/>
-				<Route
-					path="/blog/:id"
-					element={<Blog blog={selectedBlog} />}
-				/>
-			</Routes>
-		</div>
+				)}
+				<Routes>
+					<Route
+						path="/"
+						element={
+							user ? <Home /> : <Navigate replace to="/login" />
+						}
+					/>
+					<Route
+						path="/login"
+						element={user ? <Navigate replace to="/" /> : <Login />}
+					/>
+					<Route path="/users" element={<Users />} />
+					<Route
+						path="/user/:id"
+						element={<User user={selectedUser} />}
+					/>
+					<Route
+						path="/blog/:id"
+						element={<Blog blog={selectedBlog} />}
+					/>
+				</Routes>
+			</div>
+		</Container>
 	);
 };
 

@@ -1,3 +1,4 @@
+import { Alert } from "@mui/material";
 import { useSelector } from "react-redux";
 
 const Notification = () => {
@@ -8,7 +9,15 @@ const Notification = () => {
 		borderWidth: 1,
 		marginBottom: 10,
 	};
-	return <>{notification && <div style={style}>{notification}</div>}</>;
+	return (
+		<>
+			{notification && (
+				<Alert severity="info" style={style}>
+					{notification}
+				</Alert>
+			)}
+		</>
+	);
 };
 
 export default Notification;

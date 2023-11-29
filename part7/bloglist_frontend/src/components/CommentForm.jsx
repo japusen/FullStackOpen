@@ -21,9 +21,12 @@ const CommentForm = ({ id }) => {
 						value={comment}
 						onChange={(event) => setComment(event.target.value)}
 						id="comment"
+						required
 					/>
+					<button style={{ marginLeft: 5 }} type="submit">
+						add comment
+					</button>
 				</div>
-				<button type="submit">add comment</button>
 			</form>
 		</>
 	);
