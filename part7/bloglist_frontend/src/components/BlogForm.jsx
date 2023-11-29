@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createBlog } from "../reducers/blogReducer";
+import { Button, TextField } from "@mui/material";
 
 const BlogForm = ({ toggle }) => {
 	const dispatch = useDispatch();
@@ -30,33 +31,46 @@ const BlogForm = ({ toggle }) => {
 
 	return (
 		<>
-			<h1>create new blog</h1>
+			<h1 style={{ marginBottom: 0 }}>create new blog</h1>
 			<form onSubmit={onCreate}>
 				<div>
-					Title:
-					<input
+					<TextField
+						required
+						label="Title"
+						margin="normal"
 						value={title}
 						onChange={(event) => setTitle(event.target.value)}
 						id="title"
 					/>
 				</div>
 				<div>
-					Author:
-					<input
+					<TextField
+						required
+						label="Author"
+						margin="normal"
 						value={author}
 						onChange={(event) => setAuthor(event.target.value)}
 						id="author"
 					/>
 				</div>
 				<div>
-					Url:
-					<input
+					<TextField
+						required
+						label="Url"
+						margin="normal"
 						value={url}
 						onChange={(event) => setUrl(event.target.value)}
 						id="url"
 					/>
 				</div>
-				<button type="submit">save</button>
+				<Button
+					style={{ marginBottom: 10 }}
+					variant="contained"
+					color="primary"
+					type="submit"
+				>
+					save
+				</Button>
 			</form>
 		</>
 	);
