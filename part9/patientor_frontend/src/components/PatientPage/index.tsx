@@ -45,11 +45,19 @@ const PatientPage = () => {
 
 					<h3>entries</h3>
 					{patient.entries.map((entry) => (
-						<EntryDetails
-							key={entry.id}
-							entry={entry}
-							diagnoses={diagnoses}
-						/>
+						<div
+							style={{
+								border: "solid 1px black",
+								marginBottom: 10,
+								padding: 10,
+							}}
+						>
+							<EntryDetails
+								key={entry.id}
+								entry={entry}
+								diagnoses={diagnoses}
+							/>
+						</div>
 					))}
 				</>
 			)}

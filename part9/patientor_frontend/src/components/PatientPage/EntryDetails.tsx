@@ -1,4 +1,7 @@
 import { Entry, Diagnosis } from "../../types";
+import HealthCheckEntryDetails from "./HealthCheckEntry";
+import HospitalEntryDetails from "./HospitalEntry";
+import OccupationHealthcareEntryDetails from "./OccupationalHealthcareEntry";
 
 const EntryDetails = ({
 	entry,
@@ -7,27 +10,17 @@ const EntryDetails = ({
 	entry: Entry;
 	diagnoses: Diagnosis[];
 }) => {
-	return (
-		<div>
-			<p>
-				{entry.date} <em>{entry.description}</em>
-			</p>
-			{entry.diagnosisCodes && (
-				<ul>
-					{entry.diagnosisCodes.map((code) => (
-						<DiagnosisDetails
-							key={code}
-							code={code}
-							diagnoses={diagnoses}
-						/>
-					))}
-				</ul>
-			)}
-		</div>
-	);
+	switch (entry.type) {
+		case "Hospital":
+			return HospitalEntryDetails({ entry, diagnoses });
+		case "OccupationalHealthcare":
+			return OccupationHealthcareEntryDetails({ entry, diagnoses });
+		case "HealthCheck":
+			return HealthCheckEntryDetails({ entry, diagnoses });
+	}
 };
 
-const DiagnosisDetails = ({
+export const DiagnosisDetails = ({
 	code,
 	diagnoses,
 }: {
