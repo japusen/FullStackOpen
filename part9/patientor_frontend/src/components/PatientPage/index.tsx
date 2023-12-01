@@ -1,53 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Patient, Entry, Diagnosis } from "../../types";
+import { Patient, Diagnosis } from "../../types";
 import patientService from "../../services/patients";
 import diagnosesService from "../../services/diagnoses";
-
-const EntryView = ({
-	entry,
-	diagnoses,
-}: {
-	entry: Entry;
-	diagnoses: Diagnosis[];
-}) => {
-	return (
-		<div>
-			<p>
-				{entry.date} <em>{entry.description}</em>
-			</p>
-			{entry.diagnosisCodes ? (
-				<ul>
-					{entry.diagnosisCodes.map((code) => (
-						<DiagnosisView
-							key={code}
-							code={code}
-							diagnoses={diagnoses}
-						/>
-					))}
-				</ul>
-			) : (
-				<></>
-			)}
-		</div>
-	);
-};
-
-const DiagnosisView = ({
-	code,
-	diagnoses,
-}: {
-	code: string;
-	diagnoses: Diagnosis[];
-}) => {
-	const diagnosis = diagnoses.find((diagnosis) => diagnosis.code === code);
-
-	return (
-		<li key={code}>
-			{code} {diagnosis ? diagnosis.name : null}
-		</li>
-	);
-};
+import EntryDetails from "./EntryDetails";
 
 const PatientInfo = ({ patient }: { patient: Patient }) => {
 	return (
@@ -83,21 +39,19 @@ const PatientPage = () => {
 
 	return (
 		<div>
-			{patient && diagnoses ? (
+			{patient && diagnoses && (
 				<>
 					<PatientInfo patient={patient} />
 
 					<h3>entries</h3>
 					{patient.entries.map((entry) => (
-						<EntryView
+						<EntryDetails
 							key={entry.id}
 							entry={entry}
 							diagnoses={diagnoses}
 						/>
 					))}
 				</>
-			) : (
-				<>Patient Not Found</>
 			)}
 		</div>
 	);
