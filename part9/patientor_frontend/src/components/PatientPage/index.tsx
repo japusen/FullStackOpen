@@ -21,11 +21,29 @@ const PatientPage = () => {
 		<div>
 			{patient ? (
 				<>
-					<h1>{patient.name}</h1>
+					<h2>{patient.name}</h2>
 					{patient.dateOfBirth && <p>DOB: {patient.dateOfBirth}</p>}
 					<p>Gender: {patient.gender}</p>
 					{patient.ssn && <p>ssn: {patient.ssn}</p>}
 					<p>Occupation: {patient.occupation}</p>
+					<h3>entries</h3>
+
+					{patient.entries.map((entry) => (
+						<div key={entry.id}>
+							<p>
+								{entry.date} <em>{entry.description}</em>
+							</p>
+							{entry.diagnosisCodes ? (
+								<ul>
+									{entry.diagnosisCodes.map((code) => (
+										<li key={code}>{code}</li>
+									))}
+								</ul>
+							) : (
+								<></>
+							)}
+						</div>
+					))}
 				</>
 			) : (
 				<>Patient Not Found</>
