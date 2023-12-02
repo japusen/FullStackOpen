@@ -33,7 +33,10 @@ const Authors = (props) => {
 				</tbody>
 			</table>
 			<h3>update author</h3>
-			<EditAuthor setError={props.setError} />
+			<EditAuthor
+				authors={authorResult.data.allAuthors}
+				setError={props.setError}
+			/>
 		</div>
 	);
 };
