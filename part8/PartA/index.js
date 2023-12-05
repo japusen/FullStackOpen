@@ -1,12 +1,13 @@
 import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer } from "@apollo/server/standalone";
 import { GraphQLError } from "graphql";
-import Person from "./models/person";
-import User from "./models/user";
+import jwt from "jsonwebtoken";
+import "dotenv/config.js";
 
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 mongoose.set("strictQuery", false);
-require("dotenv").config();
+import Person from "./models/person.js";
+import User from "./models/user.js";
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
