@@ -32,11 +32,16 @@ const Authors = (props) => {
 					))}
 				</tbody>
 			</table>
-			<h3>update author</h3>
-			<EditAuthor
-				authors={authorResult.data.allAuthors}
-				setError={props.setError}
-			/>
+
+			{props.token && (
+				<>
+					<h3>update author</h3>
+					<EditAuthor
+						authors={authorResult.data.allAuthors}
+						setError={props.setError}
+					/>
+				</>
+			)}
 		</div>
 	);
 };

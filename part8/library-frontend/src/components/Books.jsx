@@ -1,5 +1,6 @@
 import { useQuery } from "@apollo/client";
 import { ALL_BOOKS } from "../queries";
+import NewBook from "./NewBook";
 
 const Books = (props) => {
 	const bookResult = useQuery(ALL_BOOKS);
@@ -32,6 +33,7 @@ const Books = (props) => {
 					))}
 				</tbody>
 			</table>
+			{props.token && <NewBook setError={props.setError} />}
 		</div>
 	);
 };

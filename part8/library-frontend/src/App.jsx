@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useApolloClient } from "@apollo/client";
 import Authors from "./components/Authors";
 import Books from "./components/Books";
-import NewBook from "./components/NewBook";
 import Notify from "./components/Notify";
 import LoginForm from "./components/LoginForm";
 
@@ -16,7 +15,7 @@ const App = () => {
 		setErrorMessage(message);
 		setTimeout(() => {
 			setErrorMessage(null);
-		}, 10000);
+		}, 3000);
 	};
 
 	const logout = () => {
@@ -24,6 +23,13 @@ const App = () => {
 		localStorage.clear();
 		client.resetStore();
 	};
+
+	useEffect(() => {
+		const storedToken = window.localStorage.getItem("library-user-token");
+		if (storedToken) {
+			setToken(storedToken);
+		}
+	}, []);
 
 	return (
 		<div>
@@ -33,16 +39,16 @@ const App = () => {
 				{!token && (
 					<button onClick={() => setPage("login")}>login</button>
 				)}
-				{token && (
-					<button onClick={() => setPage("add")}>add book</button>
-				)}
 				{token && <button onClick={logout}>logout</button>}
 			</div>
 
 			<Notify errorMessage={errorMessage} />
-			<Authors show={page === "authors"} setError={notify} />
-			<Books show={page === "books"} />
-			<NewBook show={page === "add"} setError={notify} />
+			<Authors
+				show={page === "authors"}
+				token={token}
+				setError={notify}
+			/>
+			<Books show={page === "books"} token={token} setError={notify} />
 			<LoginForm
 				show={page === "login"}
 				setToken={setToken}

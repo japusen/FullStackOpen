@@ -1,6 +1,5 @@
 import { ApolloServer } from "@apollo/server";
 import { startStandaloneServer } from "@apollo/server/standalone";
-import { v1 as uuid } from "uuid";
 import { GraphQLError } from "graphql";
 import jwt from "jsonwebtoken";
 import "dotenv/config.js";
@@ -165,18 +164,22 @@ const resolvers = {
 	Query: {
 		bookCount: async () => Book.collection.countDocuments(),
 		authorCount: async () => Author.collection.countDocuments(),
-		allBooks: async (root, args) => {
-			if (args.author && args.genre) {
-				const author = await Author.findOne({ name: args.author });
-				return Book.find({ author: author, genres: args.genre });
-			} else if (args.author) {
-				const author = await Author.findOne({ name: args.author });
-				return Book.find({ author: author });
-			} else if (args.genre) {
-				return Book.find({ genres: args.genre });
-			} else {
-				return Book.find({});
-			}
+		allBooks: async (root, args, context) => {
+			// if (args.author && args.genre) {
+			// 	const author = await Author.findOne({ name: args.author });
+			// 	return Book.find({
+			// 		author: author,
+			// 		genres: args.genre,
+			// 	}).populate("author");
+			// } else if (args.author) {
+			// 	const author = await Author.findOne({ name: args.author });
+			// 	return Book.find({ author: author }).populate("author");
+			// } else if (args.genre) {
+			// 	return Book.find({ genres: args.genre }).populate("author");
+			// } else {
+			// 	return Book.find({});
+			// }
+			return Book.find({}).populate("author");
 		},
 		allAuthors: async () => {
 			return Author.find({});
@@ -186,7 +189,7 @@ const resolvers = {
 		},
 	},
 	Mutation: {
-		addBook: async (root, args) => {
+		addBook: async (root, args, context) => {
 			const currentUser = context.currentUser;
 
 			if (!currentUser) {
@@ -232,7 +235,7 @@ const resolvers = {
 
 			return book;
 		},
-		editAuthor: async (root, args) => {
+		editAuthor: async (root, args, context) => {
 			const currentUser = context.currentUser;
 
 			if (!currentUser) {
