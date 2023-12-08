@@ -8,6 +8,7 @@ import LoginForm from "./components/LoginForm";
 const App = () => {
 	const [errorMessage, setErrorMessage] = useState(null);
 	const [page, setPage] = useState("authors");
+	const [genre, setGenre] = useState("");
 	const [token, setToken] = useState(null);
 	const client = useApolloClient();
 
@@ -48,7 +49,13 @@ const App = () => {
 				token={token}
 				setError={notify}
 			/>
-			<Books show={page === "books"} token={token} setError={notify} />
+			<Books
+				show={page === "books"}
+				genre={genre}
+				setGenre={setGenre}
+				token={token}
+				setError={notify}
+			/>
 			<LoginForm
 				show={page === "login"}
 				setToken={setToken}

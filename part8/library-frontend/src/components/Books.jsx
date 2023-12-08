@@ -1,39 +1,65 @@
 import { useQuery } from "@apollo/client";
-import { ALL_BOOKS } from "../queries";
+import { ALL_BOOKS, ALL_GENRES } from "../queries";
 import NewBook from "./NewBook";
 
 const Books = (props) => {
-	const bookResult = useQuery(ALL_BOOKS);
+	const allGenres = useQuery(ALL_GENRES);
+	const bookResult = useQuery(ALL_BOOKS, {
+		variables: { genre: props.genre },
+	});
 
 	if (!props.show) {
 		return null;
 	}
 
-	if (bookResult.loading) {
-		return <div>loading...</div>;
-	}
+	const updateView = () => {
+		bookResult.refetch(props.genre);
+	};
 
 	return (
 		<div>
 			<h2>books</h2>
-
-			<table>
-				<tbody>
-					<tr>
-						<th></th>
-						<th>author</th>
-						<th>published</th>
-					</tr>
-					{bookResult.data.allBooks.map((book) => (
-						<tr key={book.title}>
-							<td>{book.title}</td>
-							<td>{book.author.name}</td>
-							<td>{book.published}</td>
+			{allGenres.data && (
+				<select
+					value={props.genre}
+					onChange={(event) => {
+						props.setGenre(event.target.value);
+						updateView();
+					}}
+				>
+					<option value={""}>all genres</option>
+					{allGenres.data &&
+						allGenres.data.allGenres.map((genre) => (
+							<option key={genre} value={genre}>
+								{genre}
+							</option>
+						))}
+				</select>
+			)}
+			{bookResult.data && (
+				<table>
+					<tbody>
+						<tr>
+							<th>title</th>
+							<th>author</th>
+							<th>published</th>
+							<th>genres</th>
 						</tr>
-					))}
-				</tbody>
-			</table>
-			{props.token && <NewBook setError={props.setError} />}
+						{bookResult.data.allBooks.map((book) => (
+							<tr key={book.title}>
+								<td>{book.title}</td>
+								<td>{book.author.name}</td>
+								<td>{book.published}</td>
+								<td>{book.genres.join(", ")}</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			)}
+
+			{props.token && (
+				<NewBook setError={props.setError} updateBooks={updateView} />
+			)}
 		</div>
 	);
 };
