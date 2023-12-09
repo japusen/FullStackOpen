@@ -1,11 +1,20 @@
 import { ApolloServer } from "@apollo/server";
-import { startStandaloneServer } from "@apollo/server/standalone";
-import { GraphQLError } from "graphql";
+import { expressMiddleware } from "@apollo/server/express4";
+import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
+import { makeExecutableSchema } from "@graphql-tools/schema";
+
+import express from "express";
+import cors from "cors";
+import http from "http";
+
+import { WebSocketServer } from "ws";
+import { useServer } from "graphql-ws/lib/use/ws";
 import jwt from "jsonwebtoken";
 import "dotenv/config.js";
 
-import Book from "./models/book.js";
-import Author from "./models/author.js";
+import typeDefs from "./schema.js";
+import resolvers from "./resolvers.js";
+
 import User from "./models/user.js";
 
 import mongoose from "mongoose";
@@ -23,296 +32,60 @@ mongoose
 		console.log("error connection to MongoDB:", error.message);
 	});
 
-let authors = [
-	{
-		name: "Robert Martin",
-		id: "afa51ab0-344d-11e9-a414-719c6709cf3e",
-		born: 1952,
-	},
-	{
-		name: "Martin Fowler",
-		id: "afa5b6f0-344d-11e9-a414-719c6709cf3e",
-		born: 1963,
-	},
-	{
-		name: "Fyodor Dostoevsky",
-		id: "afa5b6f1-344d-11e9-a414-719c6709cf3e",
-		born: 1821,
-	},
-	{
-		name: "Joshua Kerievsky", // birthyear not known
-		id: "afa5b6f2-344d-11e9-a414-719c6709cf3e",
-	},
-	{
-		name: "Sandi Metz", // birthyear not known
-		id: "afa5b6f3-344d-11e9-a414-719c6709cf3e",
-	},
-];
+const start = async () => {
+	const app = express();
+	const httpServer = http.createServer(app);
 
-let books = [
-	{
-		title: "Clean Code",
-		published: 2008,
-		author: "Robert Martin",
-		id: "afa5b6f4-344d-11e9-a414-719c6709cf3e",
-		genres: ["refactoring"],
-	},
-	{
-		title: "Agile software development",
-		published: 2002,
-		author: "Robert Martin",
-		id: "afa5b6f5-344d-11e9-a414-719c6709cf3e",
-		genres: ["agile", "patterns", "design"],
-	},
-	{
-		title: "Refactoring, edition 2",
-		published: 2018,
-		author: "Martin Fowler",
-		id: "afa5de00-344d-11e9-a414-719c6709cf3e",
-		genres: ["refactoring"],
-	},
-	{
-		title: "Refactoring to patterns",
-		published: 2008,
-		author: "Joshua Kerievsky",
-		id: "afa5de01-344d-11e9-a414-719c6709cf3e",
-		genres: ["refactoring", "patterns"],
-	},
-	{
-		title: "Practical Object-Oriented Design, An Agile Primer Using Ruby",
-		published: 2012,
-		author: "Sandi Metz",
-		id: "afa5de02-344d-11e9-a414-719c6709cf3e",
-		genres: ["refactoring", "design"],
-	},
-	{
-		title: "Crime and punishment",
-		published: 1866,
-		author: "Fyodor Dostoevsky",
-		id: "afa5de03-344d-11e9-a414-719c6709cf3e",
-		genres: ["classic", "crime"],
-	},
-	{
-		title: "The Demon ",
-		published: 1872,
-		author: "Fyodor Dostoevsky",
-		id: "afa5de04-344d-11e9-a414-719c6709cf3e",
-		genres: ["classic", "revolution"],
-	},
-];
+	const wsServer = new WebSocketServer({
+		server: httpServer,
+		path: "/",
+	});
 
-const typeDefs = `
-  type User {
-    username: String!
-    favoriteGenre: String!
-    id: ID!
-  }
+	const schema = makeExecutableSchema({ typeDefs, resolvers });
+	const serverCleanup = useServer({ schema }, wsServer);
 
-  type Token {
-    value: String!
-  }
+	const server = new ApolloServer({
+		schema: makeExecutableSchema({ typeDefs, resolvers }),
+		plugins: [
+			ApolloServerPluginDrainHttpServer({ httpServer }),
+			{
+				async serverWillStart() {
+					return {
+						async drainServer() {
+							await serverCleanup.dispose();
+						},
+					};
+				},
+			},
+		],
+	});
 
-  type Author {
-    name: String!
-    id: String!
-    born: Int
-    bookCount: Int
-  }
+	await server.start();
 
-  type Book {
-    title: String!
-    published: Int!
-    author: Author!
-    id: String!
-    genres: [String!]!
-  }
-
-  type Query {
-    bookCount: Int!
-    authorCount: Int!
-    allBooks(genre: String): [Book!]
-    allAuthors: [Author!]!
-	allGenres: [String!]
-	me: User
-  }
-
-  type Mutation {
-    addBook(
-        title: String!
-        author: String!
-        published: Int!
-        genres: [String!]!
-    ): Book!
-
-    editAuthor(
-        name: String!,
-        setBornTo: Int!
-    ): Author
-
-	createUser(
-      username: String!
-      favoriteGenre: String!
-    ): User
-
-    login(
-      username: String!
-      password: String!
-    ): Token
-  }
-`;
-
-const resolvers = {
-	Query: {
-		bookCount: async () => Book.collection.countDocuments(),
-		authorCount: async () => Author.collection.countDocuments(),
-		allBooks: async (root, args) => {
-			return args.genre
-				? Book.find({ genres: args.genre }).populate("author")
-				: Book.find({}).populate("author");
-		},
-		allAuthors: async () => {
-			return Author.find({});
-		},
-		allGenres: async () => {
-			const books = await Book.find({});
-			const genres = new Set();
-			books.forEach((book) => {
-				book.genres.forEach((genre) => {
-					genres.add(genre);
-				});
-			});
-			return [...genres].sort();
-		},
-		me: (root, args, context) => {
-			return context.currentUser;
-		},
-	},
-	Mutation: {
-		addBook: async (root, args, context) => {
-			const currentUser = context.currentUser;
-
-			if (!currentUser) {
-				throw new GraphQLError("not authenticated", {
-					extensions: {
-						code: "BAD_USER_INPUT",
-					},
-				});
-			}
-
-			let author = await Author.findOne({ name: args.author });
-
-			if (!author) {
-				author = new Author({ name: args.author });
-				try {
-					await author.save();
-				} catch (error) {
-					throw new GraphQLError(
-						"Adding book failed: could not save author",
-						{
-							extensions: {
-								code: "BAD_USER_INPUT",
-								invalidArgs: args.author,
-								error,
-							},
-						}
+	app.use(
+		"/",
+		cors(),
+		express.json(),
+		expressMiddleware(server, {
+			context: async ({ req }) => {
+				const auth = req ? req.headers.authorization : null;
+				if (auth && auth.startsWith("Bearer ")) {
+					const decodedToken = jwt.verify(
+						auth.substring(7),
+						process.env.JWT_SECRET
 					);
+					const currentUser = await User.findById(decodedToken.id);
+					return { currentUser };
 				}
-			}
+			},
+		})
+	);
 
-			const book = new Book({ ...args, author });
-			try {
-				await book.save();
-			} catch (error) {
-				throw new GraphQLError("Adding book failed", {
-					extensions: {
-						code: "BAD_USER_INPUT",
-						invalidArgs: args.title,
-						error,
-					},
-				});
-			}
+	const PORT = 4000;
 
-			return book;
-		},
-		editAuthor: async (root, args, context) => {
-			const currentUser = context.currentUser;
-
-			if (!currentUser) {
-				throw new GraphQLError("not authenticated", {
-					extensions: {
-						code: "BAD_USER_INPUT",
-					},
-				});
-			}
-
-			const author = await Author.findOne({ name: args.name });
-			author.born = args.setBornTo;
-			try {
-				await author.save();
-			} catch (error) {
-				throw new GraphQLError("Editing author failed", {
-					extensions: {
-						code: "BAD_USER_INPUT",
-						invalidArgs: args.setBornTo,
-						error,
-					},
-				});
-			}
-			return author;
-		},
-		createUser: async (root, args) => {
-			const user = new User({
-				username: args.username,
-				favortieGenre: args.favortieGenre,
-			});
-
-			return user.save().catch((error) => {
-				throw new GraphQLError("Creating the user failed", {
-					extensions: {
-						code: "BAD_USER_INPUT",
-						invalidArgs: args.name,
-						error,
-					},
-				});
-			});
-		},
-		login: async (root, args) => {
-			const user = await User.findOne({ username: args.username });
-
-			if (!user || args.password !== "secret") {
-				throw new GraphQLError("wrong credentials", {
-					extensions: { code: "BAD_USER_INPUT" },
-				});
-			}
-
-			const userForToken = {
-				username: user.username,
-				id: user._id,
-			};
-
-			return { value: jwt.sign(userForToken, process.env.JWT_SECRET) };
-		},
-	},
+	httpServer.listen(PORT, () =>
+		console.log(`Server is now running on http://localhost:${PORT}`)
+	);
 };
 
-const server = new ApolloServer({
-	typeDefs,
-	resolvers,
-});
-
-startStandaloneServer(server, {
-	listen: { port: 4000 },
-	context: async ({ req, res }) => {
-		const auth = req ? req.headers.authorization : null;
-		if (auth && auth.startsWith("Bearer ")) {
-			const decodedToken = jwt.verify(
-				auth.substring(7),
-				process.env.JWT_SECRET
-			);
-			const currentUser = await User.findById(decodedToken.id);
-			return { currentUser };
-		}
-	},
-}).then(({ url }) => {
-	console.log(`Server ready at ${url}`);
-});
+start();

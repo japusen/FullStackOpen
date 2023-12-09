@@ -58,7 +58,11 @@ const Books = (props) => {
 			)}
 
 			{props.token && (
-				<NewBook setError={props.setError} updateBooks={updateView} />
+				<NewBook
+					genre={props.genre}
+					setError={props.setError}
+					updateBooks={updateView}
+				/>
 			)}
 		</div>
 	);
