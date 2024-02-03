@@ -13,6 +13,7 @@
     "@expo/metro-config": "^0.4.0",
     "@expo/webpack-config": "~19.0.1",
     "cross-env": "^7.0.3",
+    "dotenv": "^16.4.1",
     "expo": "~50.0.5",
     "expo-status-bar": "~1.11.1",
     "formik": "^2.4.5",
