@@ -50,7 +50,7 @@ const SignInForm = ({ onSubmit }) => {
 			<FormikTextInput
 				name="password"
 				placeholder="Password"
-				secureTextEntry={true}
+				secureTextEntry
 			/>
 			<Pressable onPress={onSubmit} style={styles.submitButton}>
 				<Text style={styles.submitText}>Sign in</Text>
@@ -62,13 +62,12 @@ const SignInForm = ({ onSubmit }) => {
 const SignIn = () => {
 	const navigate = useNavigate();
 
-	const [signIn, result] = useSignIn();
+	const [signIn] = useSignIn();
 	const onSubmit = async (values) => {
 		const { username, password } = values;
 		try {
 			await signIn({ username, password });
-			console.log("token", result.data);
-			navigate("/");
+			navigate("/", { replace: true });
 		} catch (e) {
 			console.log(e);
 		}
