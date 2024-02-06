@@ -1,4 +1,5 @@
-import { View, Image, StyleSheet } from "react-native";
+import { View, Image, StyleSheet, Pressable } from "react-native";
+import { useNavigate } from "react-router-native";
 import theme from "../theme";
 import Text from "./Text";
 
@@ -37,6 +38,20 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 	},
 });
+
+export const RepositoryItemContainer = ({ item }) => {
+	const navigate = useNavigate();
+
+	return (
+		<Pressable
+			onPress={() => {
+				navigate(`/repository/${item.id}`);
+			}}
+		>
+			<RepositoryItem item={item} />
+		</Pressable>
+	);
+};
 
 const RepositoryItem = ({ item }) => {
 	return (
