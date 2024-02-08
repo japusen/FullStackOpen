@@ -37,6 +37,8 @@ export const GET_SINGLE_REPOSITORY = gql`
 	query SingleRepo($id: ID!) {
 		repository(id: $id) {
 			id
+			ownerName
+			name
 			fullName
 			description
 			language
