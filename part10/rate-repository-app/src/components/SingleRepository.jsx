@@ -183,9 +183,8 @@ const SingleRepository = () => {
 			ItemSeparatorComponent={ItemSeparator}
 			renderItem={({ item }) => <ReviewItem review={item} />}
 			keyExtractor={({ id }) => id}
-			ListHeaderComponent={() => (
-				<RepositoryInfo repository={repositoryInfo} />
-			)}
+			ListHeaderComponent={<RepositoryInfo repository={repositoryInfo} />}
+			extraData={repository}
 		/>
 	);
 };
