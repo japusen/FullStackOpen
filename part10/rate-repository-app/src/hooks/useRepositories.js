@@ -12,8 +12,9 @@ const ORDER_DIRECTION = {
 	DESC: "DESC",
 };
 
-const useRepositories = (sort) => {
+const useRepositories = (sort, keyword) => {
 	let variables;
+
 	switch (sort) {
 		case SORT.HIGHEST_RATED:
 			variables = {
@@ -32,6 +33,10 @@ const useRepositories = (sort) => {
 				orderBy: ORDER_BY.LATEST,
 				orderDirection: ORDER_DIRECTION.DESC,
 			};
+	}
+
+	if (keyword) {
+		variables = { searchKeyword: keyword, ...variables };
 	}
 
 	const { loading, error, data } = useQuery(GET_REPOSITORIES, {

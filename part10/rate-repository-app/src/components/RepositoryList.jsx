@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { FlatList, View, StyleSheet } from "react-native";
-import { Menu, Button, Divider } from "react-native-paper";
+import { Menu, Button, Divider, Searchbar } from "react-native-paper";
+import { useDebounce } from "use-debounce";
+
 import useRepositories from "../hooks/useRepositories";
 import { RepositoryItemContainer } from "./RepositoryItem";
 import SORT from "../utils/Sort";
@@ -8,6 +10,11 @@ import SORT from "../utils/Sort";
 const styles = StyleSheet.create({
 	separator: {
 		height: 10,
+	},
+	headerContainer: {
+		display: "flex",
+		gap: 10,
+		margin: 10,
 	},
 });
 
@@ -48,6 +55,8 @@ const SortMenu = ({ menuIsVisible, openMenu, closeMenu, changeSort }) => {
 };
 export const RepositoryListContainer = ({
 	repositories,
+	searchKeyword,
+	updateSearchKeyword,
 	menuIsVisible,
 	openMenu,
 	closeMenu,
@@ -63,12 +72,19 @@ export const RepositoryListContainer = ({
 			ItemSeparatorComponent={ItemSeparator}
 			// other props
 			ListHeaderComponent={
-				<SortMenu
-					menuIsVisible={menuIsVisible}
-					openMenu={openMenu}
-					closeMenu={closeMenu}
-					changeSort={changeSort}
-				/>
+				<View style={styles.headerContainer}>
+					<Searchbar
+						placeholder="Search"
+						onChangeText={updateSearchKeyword}
+						value={searchKeyword}
+					/>
+					<SortMenu
+						menuIsVisible={menuIsVisible}
+						openMenu={openMenu}
+						closeMenu={closeMenu}
+						changeSort={changeSort}
+					/>
+				</View>
 			}
 			renderItem={({ item }) => <RepositoryItemContainer item={item} />}
 		/>
@@ -77,7 +93,10 @@ export const RepositoryListContainer = ({
 
 const RepositoryList = () => {
 	const [sort, setSort] = useState(SORT.LATEST);
-	const { repositories } = useRepositories(sort);
+	const [searchKeyword, setSearchKeyword] = useState("");
+	const [debouncedSearchKeyword] = useDebounce(searchKeyword, 500);
+
+	const { repositories } = useRepositories(sort, debouncedSearchKeyword);
 
 	const [visible, setVisible] = useState(false);
 
@@ -93,9 +112,15 @@ const RepositoryList = () => {
 		setSort(selectedSort);
 	};
 
+	const updateSearchKeyword = (keyword) => {
+		setSearchKeyword(keyword);
+	};
+
 	return (
 		<RepositoryListContainer
 			repositories={repositories}
+			searchKeyword={searchKeyword}
+			updateSearchKeyword={updateSearchKeyword}
 			menuIsVisible={visible}
 			openMenu={openMenu}
 			closeMenu={closeMenu}
