@@ -1,10 +1,10 @@
 import { View, StyleSheet, ScrollView, Pressable } from "react-native";
 import { Link } from "react-router-native";
 import { useNavigate } from "react-router-native";
-import { useApolloClient, useQuery } from "@apollo/client";
+import { useApolloClient } from "@apollo/client";
 import useAuthStorage from "../hooks/useAuthStorage";
 
-import { GET_USER } from "../graphql/queries";
+import useGetUser from "../hooks/useGetUser";
 
 import Constants from "expo-constants";
 import Text from "./Text";
@@ -49,8 +49,7 @@ const AppBar = () => {
 	const authStorage = useAuthStorage();
 	const navigate = useNavigate();
 
-	const { data } = useQuery(GET_USER);
-	const currentUser = data?.me;
+	const { me: currentUser } = useGetUser();
 
 	const onSignOut = async () => {
 		await authStorage.removeAccessToken();
@@ -64,9 +63,12 @@ const AppBar = () => {
 				{currentUser ? (
 					<SignOutTab signOut={onSignOut} />
 				) : (
-					<AppBarTab text={"Sign in"} link="/sign-in" />
+					<AppBarTab text="Sign in" link="/sign-in" />
 				)}
-				<AppBarTab text={"Repositories"} link="/" />
+				<AppBarTab text="Repositories" link="/" />
+				{currentUser && (
+					<AppBarTab text="My Reviews" link="/my-reviews" />
+				)}
 			</ScrollView>
 		</View>
 	);
