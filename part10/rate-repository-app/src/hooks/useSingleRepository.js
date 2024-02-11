@@ -2,12 +2,12 @@ import { useQuery } from "@apollo/client";
 import { GET_SINGLE_REPOSITORY } from "../graphql/queries";
 
 const useSingleRepository = (id) => {
-	const { loading, error, data } = useQuery(GET_SINGLE_REPOSITORY, {
+	const { loading, error, data, refetch } = useQuery(GET_SINGLE_REPOSITORY, {
 		variables: { id },
 		fetchPolicy: "cache-and-network",
 	});
 
-	return loading || error ? {} : data;
+	return [data, refetch];
 };
 
 export default useSingleRepository;

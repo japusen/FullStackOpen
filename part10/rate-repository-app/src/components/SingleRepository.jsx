@@ -2,7 +2,6 @@ import { useParams } from "react-router-native";
 import { View, StyleSheet, Pressable, Alert } from "react-native";
 import { openURL } from "expo-linking";
 import { useState } from "react";
-import { useNavigate } from "react-router-native";
 
 import useSingleRepository from "../hooks/useSingleRepository";
 import useCreateReview from "../hooks/useCreateReview";
@@ -29,10 +28,9 @@ const styles = StyleSheet.create({
 	},
 });
 
-const RepositoryHeader = ({ repository }) => {
+const RepositoryHeader = ({ repository, refetch }) => {
 	const [showReviewForm, setShowReviewForm] = useState(false);
 	const [createReview] = useCreateReview();
-	const navigate = useNavigate();
 
 	const closeForm = () => setShowReviewForm(false);
 
@@ -46,6 +44,7 @@ const RepositoryHeader = ({ repository }) => {
 				text: review,
 			});
 			closeForm();
+			refetch();
 		} catch (e) {
 			console.log(e);
 			Alert.alert(
@@ -88,18 +87,25 @@ const RepositoryHeader = ({ repository }) => {
 
 const SingleRepository = () => {
 	const { repoId } = useParams();
-	const { repository } = useSingleRepository(repoId);
+	const [data, refetch] = useSingleRepository(repoId);
 
-	const reviews = repository
+	const repository = data ? data.repository : {};
+
+	const reviews = data
 		? repository.reviews.edges.map((edge) => edge.node)
 		: [];
 
 	return (
 		<>
-			{repository && (
+			{data && (
 				<ReviewList
 					reviews={reviews}
-					header={<RepositoryHeader repository={repository} />}
+					header={
+						<RepositoryHeader
+							repository={repository}
+							refetch={refetch}
+						/>
+					}
 					extraData={reviews}
 				/>
 			)}
