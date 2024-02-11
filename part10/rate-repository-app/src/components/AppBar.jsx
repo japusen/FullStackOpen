@@ -49,7 +49,8 @@ const AppBar = () => {
 	const authStorage = useAuthStorage();
 	const navigate = useNavigate();
 
-	const { me: currentUser } = useGetUser();
+	const [data] = useGetUser();
+	const currentUser = data?.me;
 
 	const onSignOut = async () => {
 		await authStorage.removeAccessToken();

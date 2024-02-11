@@ -67,7 +67,9 @@ const RepositoryHeader = ({ repository, refetch }) => {
 				<Text color="onContainer">Open in GitHub</Text>
 			</Pressable>
 
-			{!showReviewForm && (
+			{showReviewForm ? (
+				<ReviewFormContainer onSubmit={onSubmit} onCancel={closeForm} />
+			) : (
 				<Pressable
 					style={styles.button}
 					onPress={() => {
@@ -76,10 +78,6 @@ const RepositoryHeader = ({ repository, refetch }) => {
 				>
 					<Text color="onContainer">Add a review</Text>
 				</Pressable>
-			)}
-
-			{showReviewForm && (
-				<ReviewFormContainer onSubmit={onSubmit} onCancel={closeForm} />
 			)}
 		</View>
 	);

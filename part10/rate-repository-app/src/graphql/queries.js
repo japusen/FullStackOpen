@@ -41,6 +41,7 @@ export const GET_USER = gql`
 				edges {
 					node {
 						id
+						repositoryId
 						createdAt
 						rating
 						user {
