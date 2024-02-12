@@ -55,6 +55,7 @@ const SortMenu = ({ menuIsVisible, openMenu, closeMenu, changeSort }) => {
 };
 export const RepositoryListContainer = ({
 	repositories,
+	onEndReach,
 	searchKeyword,
 	updateSearchKeyword,
 	menuIsVisible,
@@ -86,6 +87,8 @@ export const RepositoryListContainer = ({
 					/>
 				</View>
 			}
+			onEndReached={onEndReach}
+			onEndReachedThreshold={0.5}
 			renderItem={({ item }) => <RepositoryItemContainer item={item} />}
 		/>
 	);
@@ -96,7 +99,14 @@ const RepositoryList = () => {
 	const [searchKeyword, setSearchKeyword] = useState("");
 	const [debouncedSearchKeyword] = useDebounce(searchKeyword, 500);
 
-	const { repositories } = useRepositories(sort, debouncedSearchKeyword);
+	const { repositories, fetchMore } = useRepositories(
+		sort,
+		debouncedSearchKeyword
+	);
+
+	const onEndReach = () => {
+		fetchMore();
+	};
 
 	const [visible, setVisible] = useState(false);
 
@@ -119,6 +129,7 @@ const RepositoryList = () => {
 	return (
 		<RepositoryListContainer
 			repositories={repositories}
+			onEndReach={onEndReach}
 			searchKeyword={searchKeyword}
 			updateSearchKeyword={updateSearchKeyword}
 			menuIsVisible={visible}

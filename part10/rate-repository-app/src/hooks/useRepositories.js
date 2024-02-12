@@ -39,12 +39,36 @@ const useRepositories = (sort, keyword) => {
 		variables = { searchKeyword: keyword, ...variables };
 	}
 
-	const { loading, error, data } = useQuery(GET_REPOSITORIES, {
-		fetchPolicy: "cache-and-network",
-		variables: variables,
-	});
+	const { loading, error, data, fetchMore, ...result } = useQuery(
+		GET_REPOSITORIES,
+		{
+			fetchPolicy: "cache-and-network",
+			variables: variables,
+		}
+	);
 
-	return loading || error ? {} : data;
+	const handleFetchMore = () => {
+		const canFetchMore =
+			!loading && data?.repositories.pageInfo.hasNextPage;
+
+		if (!canFetchMore) {
+			return;
+		}
+
+		fetchMore({
+			variables: {
+				after: data.repositories.pageInfo.endCursor,
+				...variables,
+			},
+		});
+	};
+
+	return {
+		repositories: data?.repositories,
+		fetchMore: handleFetchMore,
+		loading,
+		...result,
+	};
 };
 
 export default useRepositories;

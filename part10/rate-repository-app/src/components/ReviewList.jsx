@@ -152,6 +152,7 @@ const ItemSeparator = () => <View style={styles.separator} />;
 
 const ReviewList = ({
 	reviews,
+	onEndReach,
 	header = <></>,
 	extraData = {},
 	hasUserActions = false,
@@ -160,6 +161,7 @@ const ReviewList = ({
 	return (
 		<FlatList
 			data={reviews}
+			onEndReached={onEndReach}
 			ItemSeparatorComponent={ItemSeparator}
 			renderItem={({ item }) => (
 				<ReviewItem

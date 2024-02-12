@@ -85,17 +85,19 @@ const RepositoryHeader = ({ repository, refetch }) => {
 
 const SingleRepository = () => {
 	const { repoId } = useParams();
-	const [data, refetch] = useSingleRepository(repoId);
+	const { repository, refetch, fetchMore } = useSingleRepository(repoId);
 
-	const repository = data ? data.repository : {};
-
-	const reviews = data
+	const reviews = repository
 		? repository.reviews.edges.map((edge) => edge.node)
 		: [];
 
+	const onEndReach = () => {
+		fetchMore();
+	};
+
 	return (
 		<>
-			{data && (
+			{repository && (
 				<ReviewList
 					reviews={reviews}
 					header={
@@ -105,6 +107,7 @@ const SingleRepository = () => {
 						/>
 					}
 					extraData={reviews}
+					onEndReach={onEndReach}
 				/>
 			)}
 		</>
